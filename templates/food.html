@@ -1,0 +1,1903 @@
+{% extends "base.html" %}
+
+{% block title %}食物資料管理{% endblock %}
+
+{% block extra_styles %}
+<!-- Font Awesome 圖示 -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    .card {
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .card-header {
+        background-color: #6c757d;
+        color: white;
+    }
+    .intent-card {
+        cursor: pointer;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .intent-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+    .selected-intent {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        border: 3px solid #343a40;
+    }
+        .table th {
+            background-color: #f1f1f1;
+        }
+        .badge {
+            font-size: 0.9em;
+        }
+        .btn-icon {
+            margin-right: 5px;
+        }
+        .page-item.active .page-link {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .page-link {
+            color: #6c757d;
+        }
+        .form-select:focus, .form-control:focus {
+            border-color: #6c757d;
+            box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+        }
+        .modal-header {
+            background-color: #6c757d;
+            color: white;
+        }
+        .intent-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+        .intent-breakfast {
+            background-color: #ffc107;
+            color: #000;
+        }
+        .intent-lunch {
+            background-color: #fd7e14;
+            color: #fff;
+        }
+        .intent-dinner {
+            background-color: #6f42c1;
+            color: #fff;
+        }
+        .intent-snack {
+            background-color: #20c997;
+            color: #fff;
+        }
+        .intent-drink {
+            background-color: #0dcaf0;
+            color: #000;
+        }
+        .cal-badge {
+            background-color: #dc3545;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+        }
+        .food-icon {
+            font-size: 1.2em;
+            margin-right: 10px;
+        }
+        .intent-selection-card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .intent-selection-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        .intent-selection-card.selected {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            border: 3px solid #007bff;
+        }
+        #detailsTable {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-utensils text-secondary me-2"></i>食物資料管理系統
+        </h2>
+        
+        <!-- Intent 分類卡片區 -->
+        <div class="row mb-4">
+            <div class="col-md-12 mb-3">
+                <h5><i class="fas fa-tags me-2"></i>餐點分類</h5>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="breakfast">
+                    <div class="card-body text-center" style="background-color: #ffc107; color: #000;">
+                        <h5 class="card-title"><i class="fas fa-coffee me-2"></i>早餐</h5>
+                        <p class="card-text display-6" id="breakfastCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="lunch">
+                    <div class="card-body text-center" style="background-color: #fd7e14; color: #fff;">
+                        <h5 class="card-title"><i class="fas fa-hamburger me-2"></i>中餐</h5>
+                        <p class="card-text display-6" id="lunchCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="dinner">
+                    <div class="card-body text-center" style="background-color: #6f42c1; color: #fff;">
+                        <h5 class="card-title"><i class="fas fa-utensils me-2"></i>晚餐</h5>
+                        <p class="card-text display-6" id="dinnerCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="snack">
+                    <div class="card-body text-center" style="background-color: #20c997; color: #fff;">
+                        <h5 class="card-title"><i class="fas fa-cookie me-2"></i>點心</h5>
+                        <p class="card-text display-6" id="snackCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="drink">
+                    <div class="card-body text-center" style="background-color: #0dcaf0; color: #000;">
+                        <h5 class="card-title"><i class="fas fa-glass-cheers me-2"></i>飲料</h5>
+                        <p class="card-text display-6" id="drinkCount">0</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="card intent-card" data-intent="unspecified">
+                    <div class="card-body text-center" style="background-color: #6c757d; color: #fff;">
+                        <h5 class="card-title"><i class="fas fa-question-circle me-2"></i>無法辨識</h5>
+                        <p class="card-text display-6" id="unspecifiedCount">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主檔表格卡片 -->
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-th-list me-2"></i>使用者列表</h5>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- 主檔搜尋區 -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="searchUserId" placeholder="依用戶ID搜尋">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="button" class="btn btn-primary" id="btnSearchMaster">
+                            <i class="fas fa-search btn-icon"></i>搜尋
+                        </button>
+                        <button type="button" class="btn btn-secondary ms-2" id="btnResetMaster">
+                            <i class="fas fa-redo btn-icon"></i>返回
+                        </button>
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <div class="d-inline-block">
+                            <label for="masterPageSize" class="me-2">每頁顯示:</label>
+                            <select class="form-select d-inline-block w-auto" id="masterPageSize">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 主檔表格 -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="masterTable">
+                        <thead>
+                            <tr>
+                                <th>用戶ID</th>
+                                <th>餐點類型</th>
+                                <th>總卡路里</th>
+                                <th>創建日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 資料將通過JavaScript動態填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 主檔分頁 -->
+                <nav>
+                    <ul class="pagination justify-content-center" id="masterPagination">
+                        <!-- 分頁將通過JavaScript動態填充 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- 6項大卡片區 -->
+        <div class="card" id="detailsTable">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-clipboard-list me-2"></i>食物明細列表 - <span id="currentMasterId"></span></h5>
+                    <div>
+                        <button type="button" class="btn btn-secondary" id="btnBackToMaster">
+                            <i class="fas fa-arrow-left btn-icon"></i>
+                        </button>
+                        <button type="button" class="btn btn-success ms-2" id="btnAddDetail">
+                            <i class="fas fa-plus-circle btn-icon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- 明細區 -->
+                <div class="row mb-3">
+                    <div class="col-md-12 text-end">
+                        <div class="d-inline-block">
+                            <label for="detailPageSize" class="me-2">每頁顯示:</label>
+                            <select class="form-select d-inline-block w-auto" id="detailPageSize">
+                                <option value="10">10</option>
+                                <option value="20">20</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 明細表格 -->
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="detailTable">
+                        <thead>
+                            <tr>
+                                <th>餐點類型</th>
+                                <th>食物描述</th>
+                                <th>卡路里</th>
+                                <th>創建日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- 資料將通過JavaScript動態填充 -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 明細分頁 -->
+                <nav>
+                    <ul class="pagination justify-content-center" id="detailPagination">
+                        <!-- 分頁將通過JavaScript動態填充 -->
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+    
+    
+    <!-- 明細新增/編輯 Modal (內嵌式模態框) -->
+    <div class="modal fade" id="detailModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="detailModalTitle">新增食物明細</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="detailForm">
+                        <input type="hidden" id="detailMode" value="add">
+                        <input type="hidden" id="detailId" value="">
+                        <input type="hidden" id="detailMasterId" value="">
+                        
+                        <div class="mb-3">
+                            <label for="detailIntent" class="form-label">餐點類型</label>
+                            <input type="text" class="form-control" id="detailIntent" readonly>
+                            <input type="hidden" id="detailIntentHidden" value="">
+                        </div>
+                        <div class="mb-3">
+                            <label for="detailDesc" class="form-label">食物描述</label>
+                            <textarea class="form-control" id="detailDesc" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="detailCalories" class="form-label">卡路里</label>
+                            <input type="number" class="form-control" id="detailCalories" required min="0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCancelDetail">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveDetail">儲存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 確認刪除 Modal (內嵌式模態框) -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">確認刪除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="deleteConfirmMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btnCancelDelete">取消</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">確認刪除</button>
+                </div>      
+            </div>
+        </div>
+    </div>
+    
+    <!-- 食物明細列表 Modal (首頁模態框) -->
+    <div class="modal fade" id="detailsModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-clipboard-list me-2"></i>食物明細列表 - <span id="modalCurrentMasterId"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- 明細區 -->
+                    <div class="row mb-3">
+                        <div class="col-md-12 text-end">
+                            <button type="button" class="btn btn-success" id="btnModalAddDetail">
+                                <i class="fas fa-plus-circle btn-icon"></i>新增明細
+                            </button>
+                            <div class="d-inline-block ms-2">
+                                <label for="modalDetailPageSize" class="me-2">每頁顯示:</label>
+                                <select class="form-select d-inline-block w-auto" id="modalDetailPageSize">
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50">50</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 明細表格 -->
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover" id="modalDetailTable">
+                            <thead>
+                                <tr>
+                                    <th>餐點類型</th>
+                                    <th>食物描述</th>
+                                    <th>卡路里</th>
+                                    <th>創建日期</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- 資料將通過JavaScript動態填充 -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- 明細分頁 -->
+                    <nav>
+                        <ul class="pagination justify-content-center" id="modalDetailPagination">
+                            <!-- 分頁將通過JavaScript動態填充 -->
+                        </ul>
+                    </nav>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 修改餐點類型 Modal -->
+    <div class="modal fade" id="intentChangeModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>修改餐點類型</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-arrow-right me-2"></i>選擇新的餐點類型</h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="早餐" style="cursor: pointer;">
+                                    <div class="card-body text-center intent-breakfast">
+                                        <h6 class="card-title"><i class="fas fa-coffee me-2"></i>早餐</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="中餐" style="cursor: pointer;">
+                                    <div class="card-body text-center intent-lunch">
+                                        <h6 class="card-title"><i class="fas fa-hamburger me-2"></i>中餐</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="晚餐" style="cursor: pointer;">
+                                    <div class="card-body text-center intent-dinner">
+                                        <h6 class="card-title"><i class="fas fa-utensils me-2"></i>晚餐</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="點心" style="cursor: pointer;">
+                                    <div class="card-body text-center intent-snack">
+                                        <h6 class="card-title"><i class="fas fa-cookie me-2"></i>點心</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="飲料" style="cursor: pointer;">
+                                    <div class="card-body text-center intent-drink">
+                                        <h6 class="card-title"><i class="fas fa-glass-cheers me-2"></i>飲料</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="card intent-selection-card" data-new-intent="無法辨識" style="cursor: pointer;">
+                                    <div class="card-body text-center" style="background-color: #6c757d; color: #fff;">
+                                        <h6 class="card-title"><i class="fas fa-question-circle me-2"></i>無法辨識</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="intentChangeDetailId" value="">
+                    <input type="hidden" id="selectedNewIntent" value="">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="btnConfirmIntentChange" disabled>
+                        <i class="fas fa-save me-2"></i>確認修改
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- 自定義 JavaScript -->
+    <script>
+        // 全局變數
+        let currentMasterPage = 1;
+        let currentDetailPage = 1;
+        let masterPageSize = 10;
+        let detailPageSize = 10;
+        let currentMasterId = '';
+        let currentIntent = ''; // 跟踪當前選擇的 intent
+        let deleteTarget = { type: '', id: '' };
+        let isFromDetailsList = false; // 追踪是否從明細列表模態框開啟
+        let isDeleteFromDetailsList = false; // 追踪刪除操作是否從明細列表發起
+        
+        // DOM 元素
+        const masterTable = document.getElementById('masterTable');
+        const detailTable = document.getElementById('detailTable');
+        const modalDetailTable = document.getElementById('modalDetailTable');
+        const masterPagination = document.getElementById('masterPagination');
+        const detailPagination = document.getElementById('detailPagination');
+        const modalDetailPagination = document.getElementById('modalDetailPagination');
+        const searchUserId = document.getElementById('searchUserId');
+        const searchIntent = document.getElementById('searchIntent');
+        const masterPageSizeSelect = document.getElementById('masterPageSize');
+        const detailPageSizeSelect = document.getElementById('detailPageSize');
+        const modalDetailPageSizeSelect = document.getElementById('modalDetailPageSize');
+        const detailsTableCard = document.getElementById('detailsTable');
+        const currentMasterIdSpan = document.getElementById('currentMasterId');
+        const modalCurrentMasterIdSpan = document.getElementById('modalCurrentMasterId');
+        
+        // Modal 實例
+        const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+        const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        const detailsModal = new bootstrap.Modal(document.getElementById('detailsModal'));
+
+        // 修正：補上翻頁功能
+        window.changeMasterPage = function(page) {
+            currentMasterPage = page;
+            loadMasterData();
+        }
+
+        window.changeDetailPage = function(page) {
+            currentDetailPage = page;
+            loadDetailData();
+        }
+        
+        // 頁面載入時執行
+        document.addEventListener('DOMContentLoaded', function() {
+            // 載入主檔數據
+            loadMasterData();
+            
+            // 添加事件監聽器
+            document.getElementById('btnSearchMaster').addEventListener('click', () => {
+                currentMasterPage = 1;
+                loadMasterData();
+            });
+            
+            document.getElementById('btnResetMaster').addEventListener('click', () => {
+                searchUserId.value = '';
+                currentMasterPage = 1;
+                loadMasterData();
+            });
+            
+            // 已移除明細搜索功能
+            
+            document.getElementById('btnModalAddDetail').addEventListener('click', () => {
+                isFromDetailsList = true; // 設置從明細列表開啟的標記
+                openAddDetailModal();
+                detailsModal.hide(); // 隱藏明細列表模態框
+                setTimeout(() => {
+                    detailModal.show(); // 顯示新增明細模態框
+                }, 300);
+            });
+            
+            if (modalDetailPageSizeSelect) {
+                modalDetailPageSizeSelect.addEventListener('change', () => {
+                    currentDetailPage = 1;
+                    loadModalDetailData();
+                });
+            }
+            
+            masterPageSizeSelect.addEventListener('change', () => {
+                masterPageSize = parseInt(masterPageSizeSelect.value);
+                currentMasterPage = 1;
+                loadMasterData();
+            });
+            
+            detailPageSizeSelect.addEventListener('change', () => {
+                detailPageSize = parseInt(detailPageSizeSelect.value);
+                currentDetailPage = 1;
+                loadDetailData();
+            });
+            
+            // 為所有 Intent 卡片添加點擊事件
+            document.querySelectorAll('.intent-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const intent = this.getAttribute('data-intent');
+                    currentIntent = intent; // 設置當前選中的intent
+                    
+                    // 載入對應 intent 的食物列表
+                    loadMasterDataByIntent(intent);
+                    
+                    // 高亮顯示選中的卡片
+                    document.querySelectorAll('.intent-card').forEach(c => {
+                        c.classList.remove('selected-intent');
+                    });
+                    this.classList.add('selected-intent');
+                });
+            });
+            
+            // 明細新增按鈕
+            document.getElementById('btnAddDetail').addEventListener('click', () => {
+                isFromDetailsList = false; // 設置不是從明細列表開啟的標記
+                document.getElementById('detailMode').value = 'add';
+                document.getElementById('detailModalTitle').textContent = '新增食物明細';
+                document.getElementById('detailId').value = '';
+                document.getElementById('detailMasterId').value = currentMasterId;
+                
+                // 根據主檔的 intent 預設選擇餐點類型
+                setDefaultIntent(currentMasterId);
+                
+                document.getElementById('detailDesc').value = '';
+                document.getElementById('detailCalories').value = '';
+                detailModal.show();
+            });
+            
+            // 返回主檔按鈕
+            document.getElementById('btnBackToMaster').addEventListener('click', () => {
+                detailsTableCard.style.display = 'none';
+                currentMasterId = '';
+            });
+            
+            // 明細儲存按鈕
+            document.getElementById('btnSaveDetail').addEventListener('click', saveDetail);
+            
+            // 取消按鈕事件處理
+            document.getElementById('btnCancelDetail').addEventListener('click', () => {
+                detailModal.hide(); // 隱藏編輯/新增明細模態框
+                
+                if (isFromDetailsList) {
+                    // 如果是從明細列表模態框開啟的，回到明細列表模態框
+                    setTimeout(() => {
+                        detailsModal.show();
+                    }, 300); // 給予一些時間讓當前模態框完全關閉
+                }
+                // 如果是從主檔頁面開啟的，則直接關閉即可
+            });
+            
+            // 刪除取消按鈕事件處理
+            document.getElementById('btnCancelDelete').addEventListener('click', () => {
+                deleteConfirmModal.hide(); // 隱藏刪除確認模態框
+
+                // 重置模態框狀態
+                setTimeout(() => {
+                    resetModalState();
+
+                    if (isDeleteFromDetailsList) {
+                        // 如果是從明細列表模態框開啟的刪除，回到明細列表模態框
+                        setTimeout(() => {
+                            detailsModal.show();
+                        }, 150); // 縮短延遲時間
+                    }
+                    // 如果是從主檔頁面開啟的，則直接關閉即可
+                }, 150); // 縮短延遲時間
+            });
+            
+            // 確認刪除按鈕
+            document.getElementById('btnConfirmDelete').addEventListener('click', confirmDelete);
+            
+            // 修改餐點類型相關事件監聽器
+            
+            // intent選擇卡片點擊事件
+            document.querySelectorAll('.intent-selection-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    // 清除其他卡片的選中狀態
+                    document.querySelectorAll('.intent-selection-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                    
+                    // 設置當前卡片為選中狀態
+                    this.classList.add('selected');
+                    
+                    // 儲存選中的intent
+                    const newIntent = this.getAttribute('data-new-intent');
+                    document.getElementById('selectedNewIntent').value = newIntent;
+                    
+                    // 啟用確認按鈕
+                    document.getElementById('btnConfirmIntentChange').disabled = false;
+                });
+            });
+            
+            // 確認修改餐點類型按鈕
+            document.getElementById('btnConfirmIntentChange').addEventListener('click', confirmIntentChange);
+            
+            // 載入統計資訊
+            loadStatistics();
+        });
+        
+        // 獲取主檔的首個或最新食物類型和總卡路里
+        function getFirstDetailIntent(masterId, callback) {
+            axios.get(`/api/v1/food/master/${encodeURIComponent(masterId)}/details?page=1&pageSize=1`)
+                .then(response => {
+                    if (response.data.status === 'success' && response.data.data.length > 0) {
+                        callback(response.data.data[0].intent || '無法辨識', response.data.data[0].total_calories || 0);
+                    } else {
+                        callback('無法辨識', 0);
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取食物類型時發生錯誤:', error);
+                    callback('無法辨識', 0);
+                });
+        }
+        
+        // 載入主檔數據
+        function loadMasterData() {
+            const userId = searchUserId.value.trim();
+            
+            // 建立請求URL
+            let url = `/api/v1/food/master?page=${currentMasterPage}&pageSize=${masterPageSize}`;
+            if (userId) {
+                url += `&userId=${encodeURIComponent(userId)}`;
+            }
+            
+            axios.get(url)
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        renderMasterTable(response.data);
+                        renderMasterPagination(response.data.totalCount);
+                    } else {
+                        showError('載入食物主檔數據失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('載入食物主檔數據時發生錯誤:', error);
+                    showError('載入食物主檔數據時發生錯誤');
+                });
+        }
+        
+        // 根據 Intent 載入主檔數據
+        function loadMasterDataByIntent(intent) {
+            // 將英文 intent 轉換為中文
+            const intentMap = {
+                'breakfast': '早餐',
+                'lunch': '中餐',
+                'dinner': '晚餐',
+                'snack': '點心',
+                'drink': '飲料',
+                'unspecified': '無法辨識'
+            };
+            
+            const intentText = intentMap[intent] || '';
+            
+            // 先從食物明細API獲取指定intent的所有記錄 - 不受頁面限制，搜索整個資料庫
+            let detailsUrl = `/api/v1/food/details?intent=${encodeURIComponent(intentText)}&page=1&pageSize=10000`;
+            
+            axios.get(detailsUrl)
+                .then(detailsResponse => {
+                    if (detailsResponse.data.status === 'success') {
+                        const details = detailsResponse.data.data || [];
+                        
+                        // 提取所有相關主檔的ID - 這裡使用Set確保每個ID只出現一次
+                        const masterIds = [...new Set(details.map(item => item.master_id))];
+                        
+                        if (masterIds.length === 0) {
+                            // 沒有找到相關主檔
+                            renderMasterTable({data: [], totalCount: 0});
+                            renderMasterPagination(0);
+                            currentMasterId = '';
+                            detailsTableCard.style.display = 'none';
+                            return;
+                        }
+                        
+                        // 使用Promise.all獲取所有主檔的詳細信息
+                        const masterPromises = [];
+                        
+                        // 使用一個較大的批次大小，一次性獲取所有主檔信息
+                        const batchSize = 100;
+                        
+                        // 為了避免API調用次數過多，我們使用批次處理
+                        for (let i = 0; i < masterIds.length; i += batchSize) {
+                            const batchIds = masterIds.slice(i, i + batchSize);
+                            
+                            // 遍歷每個主檔ID，獲取詳細信息
+                            batchIds.forEach(masterId => {
+                                const masterPromise = new Promise(resolve => {
+                                    axios.get(`/api/v1/food/master/${masterId}`)
+                                        .then(masterResponse => {
+                                            if (masterResponse.data.status === 'success') {
+                                                resolve(masterResponse.data.data);
+                                            } else {
+                                                resolve(null);
+                                            }
+                                        })
+                                        .catch(() => resolve(null));
+                                });
+                                
+                                masterPromises.push(masterPromise);
+                            });
+                        }
+                        
+                        // 等待所有主檔信息獲取完成
+                        Promise.all(masterPromises)
+                            .then(masters => {
+                                // 過濾掉null值
+                                const validMasters = masters.filter(m => m !== null);
+                                
+                                // 計算分頁信息
+                                const totalCount = validMasters.length;
+                                const startIndex = (currentMasterPage - 1) * masterPageSize;
+                                const endIndex = Math.min(startIndex + masterPageSize, validMasters.length);
+                                const pagedMasters = validMasters.slice(startIndex, endIndex);
+                                
+                                // 渲染表格和分頁
+                                renderMasterTable({
+                                    data: pagedMasters,
+                                    totalCount: totalCount,
+                                    page: currentMasterPage,
+                                    pageSize: masterPageSize
+                                });
+                                renderMasterPagination(totalCount);
+                                
+                                // 清空當前主檔ID，因為我們現在是按照 intent 篩選
+                                currentMasterId = '';
+                                detailsTableCard.style.display = 'none';
+                            });
+                    } else {
+                        showError('載入食物明細數據失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('載入食物明細數據時發生錯誤:', error);
+                    showError('載入食物明細數據時發生錯誤');
+                });
+        }
+        
+        // 載入明細數據
+        function loadDetailData() {
+            if (!currentMasterId) return;
+            
+            // 建立請求URL
+            const url = `/api/v1/food/master/${encodeURIComponent(currentMasterId)}/details?page=${currentDetailPage}&pageSize=${detailPageSize}`;
+            
+            axios.get(url)
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        renderDetailTable(response.data);
+                        renderDetailPagination(response.data.totalCount);
+                    } else {
+                        showError('載入食物明細數據失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('載入食物明細數據時發生錯誤:', error);
+                    showError('載入食物明細數據時發生錯誤');
+                });
+        }
+        
+        // 渲染主檔表格
+        function renderMasterTable(data) {
+            const tbody = masterTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (data.data.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="4" class="text-center">沒有找到記錄</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            data.data.forEach(item => {
+                const tr = document.createElement('tr');
+                
+                // 格式化日期
+                const createDate = new Date(item.createDate);
+                const formattedDate = createDate.toLocaleString('zh-TW');
+                
+                // 獲取該主檔的食物類型(Intent)和總卡路里
+                getFirstDetailIntent(item.id, (intent, totalCalories) => {
+                    let intentClass = '';
+                    let intentIcon = '';
+                    
+                    switch (intent) {
+                        case '早餐':
+                            intentClass = 'intent-breakfast';
+                            intentIcon = 'fa-coffee';
+                            break;
+                        case '中餐':
+                            intentClass = 'intent-lunch';
+                            intentIcon = 'fa-utensils';
+                            break;
+                        case '晚餐':
+                            intentClass = 'intent-dinner';
+                            intentIcon = 'fa-moon';
+                            break;
+                        case '點心':
+                            intentClass = 'intent-snack';
+                            intentIcon = 'fa-cookie-bite';
+                            break;
+                        case '飲料':
+                            intentClass = 'intent-drink';
+                            intentIcon = 'fa-glass-whiskey';
+                            break;
+                        default:
+                            intentClass = 'bg-secondary text-white';
+                            intentIcon = 'fa-question-circle';
+                    }
+                    
+                    tr.innerHTML = `
+                        <td>${item.user_id}</td>
+                        <td>
+                            <span class="badge intent-badge ${intentClass}">
+                                <i class="fas ${intentIcon} me-1"></i>${intent || '無法辨識'}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="cal-badge">
+                                <i class="fas fa-calculator me-1"></i>${totalCalories}
+                            </span>
+                        </td>
+                        <td>${formattedDate}</td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-info me-1" data-id="${item.id}" data-bs-toggle="modal" data-bs-target="#detailsModal" onclick="viewDetails('${item.id}')">
+                                <i class="fas fa-list-ul"></i> 明細
+                            </button>
+                            <button type="button" class="btn btn-sm btn-primary me-1" data-id="${item.id}" data-bs-toggle="modal" data-bs-target="#photoModal" onclick="viewPhoto('${item.id}', '${item.user_id}')" title="查看圖片: /static/images/${item.id}.jpg">
+                                <i class="fas fa-camera"></i> 照片
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" data-id="${item.id}" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" onclick="deleteMaster('${item.id}')">
+                                <i class="fas fa-trash-alt"></i> 刪除
+                            </button>
+                        </td>
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+        
+        // 渲染明細表格
+        function renderDetailTable(data) {
+            const tbody = detailTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (data.data.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="6" class="text-center">沒有找到記錄</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            data.data.forEach(item => {
+                const tr = document.createElement('tr');
+                
+                // 格式化日期
+                const createDate = new Date(item.createDate);
+                const formattedDate = createDate.toLocaleString('zh-TW');
+                
+                // 意圖樣式
+                let intentClass = '';
+                let intentIcon = '';
+                
+                switch (item.intent) {
+                    case '早餐':
+                        intentClass = 'intent-breakfast';
+                        intentIcon = 'fa-coffee';
+                        break;
+                    case '中餐':
+                        intentClass = 'intent-lunch';
+                        intentIcon = 'fa-utensils';
+                        break;
+                    case '晚餐':
+                        intentClass = 'intent-dinner';
+                        intentIcon = 'fa-moon';
+                        break;
+                    case '點心':
+                        intentClass = 'intent-snack';
+                        intentIcon = 'fa-cookie-bite';
+                        break;
+                    case '飲料':
+                        intentClass = 'intent-drink';
+                        intentIcon = 'fa-glass-whiskey';
+                        break;
+                    default:
+                        intentClass = 'bg-secondary text-white';
+                        intentIcon = 'fa-question-circle';
+                }
+                
+                tr.innerHTML = `
+                    <td>
+                        <span class="badge intent-badge ${intentClass}">
+                            <i class="fas ${intentIcon} me-1"></i>${item.intent || '無法辨識'}
+                        </span>
+                    </td>
+                    <td>
+                        <i class="fas fa-hamburger food-icon text-secondary"></i>${item.desc_text || ''}
+                    </td>
+                    <td>
+                        <span class="cal-badge">
+                            <i class="fas fa-fire-alt me-1"></i>${item.calories || 0}
+                        </span>
+                    </td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-warning me-1" onclick="showIntentChangeModal(${item.id}, '${(item.intent || '無法辨識').replace(/'/g, '\\\'').replace(/"/g, '&quot;')}', '${(item.desc_text || '').replace(/'/g, '\\\'').replace(/"/g, '&quot;')}')">
+                            <i class="fas fa-exchange-alt"></i> 修改類型
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary me-1" data-bs-toggle="modal" data-bs-target="#detailModal" onclick="editDetail(${item.id})">
+                            <i class="fas fa-edit"></i> 編輯
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" onclick="deleteDetail(${item.id})">
+                            <i class="fas fa-trash-alt"></i> 刪除
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // 渲染主檔分頁
+        function renderMasterPagination(totalCount) {
+            const totalPages = Math.ceil(totalCount / masterPageSize);
+            masterPagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 上一頁
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentMasterPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" ${currentMasterPage > 1 ? 'onclick="changeMasterPage(' + (currentMasterPage - 1) + '); return false;"' : ''}>上一頁</a>`;
+            masterPagination.appendChild(prevLi);
+            
+            // 頁碼
+            let startPage = Math.max(1, currentMasterPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentMasterPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeMasterPage(${i}); return false;">${i}</a>`;
+                masterPagination.appendChild(li);
+            }
+            
+            // 下一頁
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentMasterPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" ${currentMasterPage < totalPages ? 'onclick="changeMasterPage(' + (currentMasterPage + 1) + '); return false;"' : ''}>下一頁</a>`;
+            masterPagination.appendChild(nextLi);
+        }
+        
+        // 渲染明細分頁
+        function renderDetailPagination(totalCount) {
+            const totalPages = Math.ceil(totalCount / detailPageSize);
+            detailPagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 上一頁
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentDetailPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" ${currentDetailPage > 1 ? 'onclick="changeDetailPage(' + (currentDetailPage - 1) + '); return false;"' : ''}>上一頁</a>`;
+            detailPagination.appendChild(prevLi);
+            
+            // 頁碼
+            let startPage = Math.max(1, currentDetailPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentDetailPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeDetailPage(${i}); return false;">${i}</a>`;
+                detailPagination.appendChild(li);
+            }
+            
+            // 下一頁
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentDetailPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" ${currentDetailPage < totalPages ? 'onclick="changeDetailPage(' + (currentDetailPage + 1) + '); return false;"' : ''}>下一頁</a>`;
+            detailPagination.appendChild(nextLi);
+        }
+        
+        // 渲染Modal明細表格
+        function renderModalDetailTable(data) {
+            const tbody = modalDetailTable.querySelector('tbody');
+            tbody.innerHTML = '';
+            
+            if (data.data.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = '<td colspan="5" class="text-center">沒有找到記錄</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            
+            data.data.forEach(item => {
+                const tr = document.createElement('tr');
+                
+                // 格式化日期
+                const createDate = new Date(item.createDate);
+                const formattedDate = createDate.toLocaleString('zh-TW');
+                
+                // 意圖樣式
+                let intentClass = '';
+                let intentIcon = '';
+                
+                switch (item.intent) {
+                    case '早餐':
+                        intentClass = 'intent-breakfast';
+                        intentIcon = 'fa-coffee';
+                        break;
+                    case '中餐':
+                        intentClass = 'intent-lunch';
+                        intentIcon = 'fa-utensils';
+                        break;
+                    case '晚餐':
+                        intentClass = 'intent-dinner';
+                        intentIcon = 'fa-moon';
+                        break;
+                    case '點心':
+                        intentClass = 'intent-snack';
+                        intentIcon = 'fa-cookie-bite';
+                        break;
+                    case '飲料':
+                        intentClass = 'intent-drink';
+                        intentIcon = 'fa-glass-whiskey';
+                        break;
+                    default:
+                        intentClass = 'bg-secondary text-white';
+                        intentIcon = 'fa-question-circle';
+                }
+                
+                tr.innerHTML = `
+                    <td>
+                        <span class="badge intent-badge ${intentClass}">
+                            <i class="fas ${intentIcon} me-1"></i>${item.intent || '無法辨識'}
+                        </span>
+                    </td>
+                    <td>
+                        <i class="fas fa-hamburger food-icon text-secondary"></i>${item.desc_text || ''}
+                    </td>
+                    <td>
+                        <span class="cal-badge">
+                            <i class="fas fa-fire-alt me-1"></i>${item.calories || 0}
+                        </span>
+                    </td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-warning me-1" onclick="showIntentChangeModal(${item.id}, '${(item.intent || '無法辨識').replace(/'/g, '\\\'').replace(/"/g, '&quot;')}', '${(item.desc_text || '').replace(/'/g, '\\\'').replace(/"/g, '&quot;')}')">
+                            <i class="fas fa-exchange-alt"></i> 修改類型
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary me-1" onclick="editDetailFromModal(${item.id})">
+                            <i class="fas fa-edit"></i> 編輯
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="deleteDetailFromModal(${item.id})">
+                            <i class="fas fa-trash-alt"></i> 刪除
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+        }
+        
+        // 渲染Modal明細分頁
+        function renderModalDetailPagination(totalCount) {
+            const detailPageSize = modalDetailPageSizeSelect ? parseInt(modalDetailPageSizeSelect.value) : 10;
+            const totalPages = Math.ceil(totalCount / detailPageSize);
+            modalDetailPagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // 上一頁
+            const prevLi = document.createElement('li');
+            prevLi.className = `page-item ${currentDetailPage === 1 ? 'disabled' : ''}`;
+            prevLi.innerHTML = `<a class="page-link" href="#" ${currentDetailPage > 1 ? 'onclick="changeModalDetailPage(' + (currentDetailPage - 1) + '); return false;"' : ''}>上一頁</a>`;
+            modalDetailPagination.appendChild(prevLi);
+            
+            // 頁碼
+            let startPage = Math.max(1, currentDetailPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item ${i === currentDetailPage ? 'active' : ''}`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="changeModalDetailPage(${i}); return false;">${i}</a>`;
+                modalDetailPagination.appendChild(li);
+            }
+            
+            // 下一頁
+            const nextLi = document.createElement('li');
+            nextLi.className = `page-item ${currentDetailPage === totalPages ? 'disabled' : ''}`;
+            nextLi.innerHTML = `<a class="page-link" href="#" ${currentDetailPage < totalPages ? 'onclick="changeModalDetailPage(' + (currentDetailPage + 1) + '); return false;"' : ''}>下一頁</a>`;
+            modalDetailPagination.appendChild(nextLi);
+        }
+        
+        // 切換Modal明細頁碼
+        function changeModalDetailPage(page) {
+            currentDetailPage = page;
+            loadModalDetailData();
+        }
+        
+        // 查看明細
+        function viewDetails(masterId) {
+            currentMasterId = masterId;
+            modalCurrentMasterIdSpan.textContent = masterId;
+            currentDetailPage = 1;
+            loadModalDetailData();
+            // 不需要手動顯示模態框，因為使用了 data-bs-toggle 和 data-bs-target
+            // detailsModal.show();
+        }
+        
+        // 載入Modal明細數據
+        function loadModalDetailData() {
+            const detailPageSize = modalDetailPageSizeSelect ? parseInt(modalDetailPageSizeSelect.value) : 10;
+            
+            // 建立請求URL
+            let url = `/api/v1/food/master/${currentMasterId}/details?page=${currentDetailPage}&pageSize=${detailPageSize}`;
+            
+            axios.get(url)
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        renderModalDetailTable(response.data);
+                        renderModalDetailPagination(response.data.totalCount);
+                    } else {
+                        showError('載入食物明細數據失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('載入食物明細數據時發生錯誤:', error);
+                    showError('載入食物明細數據時發生錯誤');
+                });
+        }
+        
+        // 從Modal打開新增明細
+        function openAddDetailModal() {
+            document.getElementById('detailMode').value = 'add';
+            document.getElementById('detailModalTitle').textContent = '新增食物明細';
+            document.getElementById('detailId').value = '';
+            document.getElementById('detailMasterId').value = currentMasterId;
+            
+            // 根據主檔的 intent 預設選擇餐點類型
+            setDefaultIntent(currentMasterId);
+            
+            document.getElementById('detailDesc').value = '';
+            document.getElementById('detailCalories').value = '';
+            // 不需要手動顯示模態框，因為使用了 data-bs-toggle 和 data-bs-target
+            // detailModal.show();
+        }
+        
+        // 模態框狀態重置函數
+        function resetModalState() {
+            // 清理所有背景遮罩
+            document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+            // 移除body上的modal-open類
+            document.body.classList.remove('modal-open');
+            // 重置滾動鎖定
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+
+        // 刪除主檔
+        function deleteMaster(id) {
+            // 重置模態框狀態
+            resetModalState();
+
+            deleteTarget = { type: 'master', id };
+            document.getElementById('deleteConfirmMessage').textContent = `確定要刪除ID為 ${id} 的食物主檔嗎？這將同時刪除所有相關的明細記錄！`;
+
+            // 確保模態框能正確顯示
+            setTimeout(() => {
+                deleteConfirmModal.show();
+            }, 100);
+        }
+
+        // 編輯明細
+        function editDetail(id, fromDetailsList = false) {
+            // 如果不是從明細列表模態框發起，但主頁有顯示明細（currentMasterId不為空），也應該返回明細顯示
+            isFromDetailsList = fromDetailsList || (currentMasterId !== '');
+            // 獲取明細詳情
+            axios.get(`/api/v1/food/details/${id}`)
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        const detail = response.data.data;
+
+                        document.getElementById('detailMode').value = 'edit';
+                        document.getElementById('detailModalTitle').textContent = '編輯食物明細';
+                        document.getElementById('detailId').value = detail.id;
+                        document.getElementById('detailMasterId').value = detail.master_id;
+                        document.getElementById('detailIntent').value = detail.intent || '';
+                        document.getElementById('detailIntentHidden').value = detail.intent || '';
+                        document.getElementById('detailDesc').value = detail.desc_text || '';
+                        document.getElementById('detailCalories').value = detail.calories || 0;
+
+                        // 不需要手動顯示模態框，因為使用了 data-bs-toggle 和 data-bs-target
+                        // detailModal.show();
+                    } else {
+                        showError('獲取食物明細詳情失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取食物明細詳情時發生錯誤:', error);
+                    showError('獲取食物明細詳情時發生錯誤');
+                });
+        }
+
+        // 刪除明細
+        function deleteDetail(id, fromDetailsList = false) {
+            // 重置模態框狀態
+            resetModalState();
+
+            // 如果不是從明細列表模態框發起，但主頁有顯示明細（currentMasterId不為空），也應該返回明細顯示
+            isDeleteFromDetailsList = fromDetailsList || (currentMasterId !== '');
+            deleteTarget = { type: 'detail', id };
+            document.getElementById('deleteConfirmMessage').textContent = `確定要刪除ID為 ${id} 的食物明細嗎？`;
+
+            // 確保模態框能正確顯示
+            setTimeout(() => {
+                deleteConfirmModal.show();
+            }, 100);
+        }
+
+        // 從明細列表模態框編輯明細
+        function editDetailFromModal(id) {
+            isFromDetailsList = true;
+            detailsModal.hide(); // 隱藏明細列表模態框
+
+            // 獲取明細詳情
+            axios.get(`/api/v1/food/details/${id}`)
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        const detail = response.data.data;
+
+                        document.getElementById('detailMode').value = 'edit';
+                        document.getElementById('detailModalTitle').textContent = '編輯食物明細';
+                        document.getElementById('detailId').value = detail.id;
+                        document.getElementById('detailMasterId').value = detail.master_id;
+                        document.getElementById('detailIntent').value = detail.intent || '';
+                        document.getElementById('detailIntentHidden').value = detail.intent || '';
+                        document.getElementById('detailDesc').value = detail.desc_text || '';
+                        document.getElementById('detailCalories').value = detail.calories || 0;
+
+                        setTimeout(() => {
+                            detailModal.show(); // 顯示編輯明細模態框
+                        }, 300);
+                    } else {
+                        showError('獲取食物明細詳情失敗');
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取食物明細詳情時發生錯誤:', error);
+                    showError('獲取食物明細詳情時發生錯誤');
+                });
+        }
+
+        // 從明細列表模態框刪除明細
+        function deleteDetailFromModal(id) {
+            // 重置模態框狀態
+            resetModalState();
+
+            isDeleteFromDetailsList = true;
+            deleteTarget = { type: 'detail', id };
+            document.getElementById('deleteConfirmMessage').textContent = `確定要刪除ID為 ${id} 的食物明細嗎？`;
+
+            detailsModal.hide(); // 隱藏明細列表模態框
+            setTimeout(() => {
+                deleteConfirmModal.show(); // 顯示刪除確認模態框
+            }, 150); // 縮短延遲時間
+        }        // 計算並更新特定主檔的總卡路里
+        function updateTotalCalories(masterId) {
+            // 不阻塞畫面，同時進行計算
+            return new Promise((resolve, reject) => {
+                axios.get(`/api/v1/food/master/${encodeURIComponent(masterId)}/details?page=1&pageSize=1000`)
+                    .then(response => {
+                        if (response.data.status === 'success') {
+                            const details = response.data.data || [];
+                            // 計算總卡路里
+                            let totalCalories = 0;
+                            details.forEach(item => {
+                                totalCalories += parseInt(item.calories) || 0;
+                            });
+                            
+                            // 更新表格中該主檔的總卡路里顯示
+                            const rows = masterTable.querySelectorAll('tbody tr');
+                            rows.forEach(row => {
+                                const viewBtn = row.querySelector(`button[data-id="${masterId}"]`);
+                                if (viewBtn) {
+                                    const calBadge = row.querySelector('.cal-badge');
+                                    if (calBadge) {
+                                        calBadge.innerHTML = `<i class="fas fa-calculator me-1"></i>${totalCalories}`;
+                                    }
+                                }
+                            });
+                            
+                            // 同步更新資料庫中的總卡路里
+                            return axios.put(`/api/v1/food/master/${encodeURIComponent(masterId)}/update-total-calories`)
+                                .then(updateResponse => {
+                                    if (updateResponse.data.status === 'success') {
+                                        console.log(`主檔 ${masterId} 總卡路里已同步到資料庫: ${totalCalories}`);
+                                        resolve(totalCalories);
+                                    } else {
+                                        console.warn(`資料庫更新失敗，但前端顯示已更新: ${updateResponse.data.message}`);
+                                        resolve(totalCalories); // 即使資料庫更新失敗，也回傳計算的總卡路里
+                                    }
+                                })
+                                .catch(updateError => {
+                                    console.error('同步總卡路里到資料庫時發生錯誤:', updateError);
+                                    resolve(totalCalories); // 即使資料庫更新失敗，也回傳計算的總卡路里
+                                });
+                        } else {
+                            reject(new Error('獲取食物明細失敗'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('計算總卡路里時發生錯誤:', error);
+                        reject(error);
+                    });
+            });
+        }
+        
+        // 儲存明細
+        function saveDetail() {
+            const mode = document.getElementById('detailMode').value;
+            const id = document.getElementById('detailId').value;
+            const masterId = document.getElementById('detailMasterId').value;
+            const intent = document.getElementById('detailIntentHidden').value || document.getElementById('detailIntent').value;
+            const desc = document.getElementById('detailDesc').value.trim();
+            const calories = parseInt(document.getElementById('detailCalories').value) || 0;
+            
+            // 驗證輸入
+            if (!intent) {
+                showError('餐點類型不能為空');
+                return;
+            }
+            
+            if (!desc) {
+                showError('請輸入食物描述');
+                return;
+            }
+            
+            // 發送請求
+            if (mode === 'add') {
+                axios.post('/api/v1/food/details', {
+                    master_id: masterId,
+                    intent,
+                    desc_text: desc,
+                    calories
+                })
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        detailModal.hide();
+                        
+                        // 即時更新總卡路里 (非同步)
+                        updateTotalCalories(masterId).catch(err => console.error('更新總卡路里失敗:', err));
+                        
+                        // 更新明細數據
+                        loadDetailData();
+                        loadModalDetailData(); // 更新Modal中的明細列表
+                        loadStatistics();
+                        
+                        // 如果是從明細列表模態框開啟的，返回到明細列表模態框
+                        if (isFromDetailsList) {
+                            setTimeout(() => {
+                                detailsModal.show();
+                            }, 300); // 給予一些時間讓當前模態框完全關閉
+                        }
+                    } else {
+                        showError('新增食物明細失敗: ' + (response.data.message || ''));
+                    }
+                })
+                .catch(error => {
+                    console.error('新增食物明細時發生錯誤:', error);
+                    showError('新增食物明細時發生錯誤');
+                });
+            } else {
+                axios.put(`/api/v1/food/details/${id}`, {
+                    intent,
+                    desc_text: desc,
+                    calories
+                })
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        detailModal.hide();
+                        
+                        // 即時更新總卡路里 (非同步)
+                        updateTotalCalories(masterId).catch(err => console.error('更新總卡路里失敗:', err));
+                        
+                        // 更新明細數據
+                        loadDetailData();
+                        loadModalDetailData(); // 更新Modal中的明細列表
+                        loadStatistics();
+                        
+                        // 如果是從明細列表模態框開啟的，返回到明細列表模態框
+                        if (isFromDetailsList) {
+                            setTimeout(() => {
+                                detailsModal.show();
+                            }, 300); // 給予一些時間讓當前模態框完全關閉
+                        }
+                    } else {
+                        showError('更新食物明細失敗: ' + (response.data.message || ''));
+                    }
+                })
+                .catch(error => {
+                    console.error('更新食物明細時發生錯誤:', error);
+                    showError('更新食物明細時發生錯誤');
+                });
+            }
+        }
+        
+        // 確認刪除
+        function confirmDelete() {
+            if (deleteTarget.type === 'master') {
+                // 顯示載入狀態
+                const confirmBtn = document.getElementById('btnConfirmDelete');
+                const originalText = confirmBtn.innerHTML;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刪除中...';
+                confirmBtn.disabled = true;
+
+                axios.delete(`/api/v1/food/master/${deleteTarget.id}`)
+                    .then(response => {
+                        if (response.data.status === 'success') {
+                            // 立即隱藏刪除確認模態框
+                            deleteConfirmModal.hide();
+
+                            // 簡化處理流程，減少延遲
+                            setTimeout(() => {
+                                // 重置模態框狀態
+                                resetModalState();
+
+                                // 處理當前主檔狀態
+                                if (currentMasterId === deleteTarget.id) {
+                                    if (detailsModal) {
+                                        detailsModal.hide();
+                                    }
+                                    currentMasterId = '';
+                                }
+
+                                // 一次性載入所有必要數據，避免多次重繪
+                                Promise.all([
+                                    loadMasterData(),
+                                    loadStatistics()
+                                ]).then(() => {
+                                    // 數據載入完成後恢復按鈕狀態
+                                    confirmBtn.innerHTML = originalText;
+                                    confirmBtn.disabled = false;
+                                }).catch(() => {
+                                    confirmBtn.innerHTML = originalText;
+                                    confirmBtn.disabled = false;
+                                });
+                            }, 150); // 縮短延遲時間
+                        } else {
+                            showError('刪除食物主檔失敗: ' + (response.data.message || ''));
+                            confirmBtn.innerHTML = originalText;
+                            confirmBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('刪除食物主檔時發生錯誤:', error);
+                        showError('刪除食物主檔時發生錯誤');
+                        confirmBtn.innerHTML = originalText;
+                        confirmBtn.disabled = false;
+                    });
+            } else if (deleteTarget.type === 'detail') {
+                // 顯示載入狀態
+                const confirmBtn = document.getElementById('btnConfirmDelete');
+                const originalText = confirmBtn.innerHTML;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刪除中...';
+                confirmBtn.disabled = true;
+
+                // 先獲取明細項目的 master_id
+                axios.get(`/api/v1/food/details/${deleteTarget.id}`)
+                    .then(detailResponse => {
+                        if (detailResponse.data.status === 'success') {
+                            const masterId = detailResponse.data.data.master_id;
+
+                            // 執行刪除操作
+                            return axios.delete(`/api/v1/food/details/${deleteTarget.id}`)
+                                .then(response => {
+                                    if (response.data.status === 'success') {
+                                        // 立即隱藏刪除確認模態框
+                                        deleteConfirmModal.hide();
+
+                                        // 簡化處理流程
+                                        setTimeout(() => {
+                                            // 重置模態框狀態
+                                            resetModalState();
+
+                                            // 一次性載入所有必要數據
+                                            Promise.all([
+                                                updateTotalCalories(masterId).catch(err => console.error('更新總卡路里失敗:', err)),
+                                                loadDetailData(),
+                                                loadModalDetailData(),
+                                                loadStatistics()
+                                            ]).then(() => {
+                                                // 數據載入完成後恢復按鈕狀態
+                                                confirmBtn.innerHTML = originalText;
+                                                confirmBtn.disabled = false;
+
+                                                // 明細刪除後跳回明細列表模態框
+                                                setTimeout(() => {
+                                                    detailsModal.show();
+                                                }, 100); // 縮短延遲
+                                            }).catch(() => {
+                                                confirmBtn.innerHTML = originalText;
+                                                confirmBtn.disabled = false;
+                                            });
+                                        }, 150); // 縮短延遲時間
+                                    } else {
+                                        showError('刪除食物明細失敗: ' + (response.data.message || ''));
+                                        confirmBtn.innerHTML = originalText;
+                                        confirmBtn.disabled = false;
+                                    }
+                                });
+                        } else {
+                            showError('獲取食物明細資訊失敗');
+                            confirmBtn.innerHTML = originalText;
+                            confirmBtn.disabled = false;
+                            return Promise.reject(new Error('獲取食物明細資訊失敗'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('刪除食物明細時發生錯誤:', error);
+                        showError('刪除食物明細時發生錯誤');
+                        confirmBtn.innerHTML = originalText;
+                        confirmBtn.disabled = false;
+                    });
+            }
+        }
+        
+        // 設置明細模態框中的預設餐點類型
+        function setDefaultIntent(masterId) {
+            if (!masterId) {
+                document.getElementById('detailIntent').value = '';
+                document.getElementById('detailIntentHidden').value = '';
+                return;
+            }
+            
+            // 從主檔ID獲取明細列表
+            axios.get(`/api/v1/food/master/${masterId}/details?page=1&pageSize=5`)
+                .then(response => {
+                    if (response.data.status === 'success' && response.data.data.length > 0) {
+                        // 統計各種 intent 的出現次數
+                        const intentCounts = {};
+                        
+                        response.data.data.forEach(item => {
+                            const intent = item.intent || '';
+                            if (intent) {
+                                intentCounts[intent] = (intentCounts[intent] || 0) + 1;
+                            }
+                        });
+                        
+                        // 找出出現次數最多的 intent 作為預設值
+                        let maxCount = 0;
+                        let defaultIntent = '';
+                        
+                        for (const [intent, count] of Object.entries(intentCounts)) {
+                            if (count > maxCount) {
+                                maxCount = count;
+                                defaultIntent = intent;
+                            }
+                        }
+                        
+                        // 設置預設值到輸入框和隱藏字段
+                        document.getElementById('detailIntent').value = defaultIntent;
+                        document.getElementById('detailIntentHidden').value = defaultIntent;
+                    } else {
+                        // 沒有明細記錄，設置為空
+                        document.getElementById('detailIntent').value = '';
+                        document.getElementById('detailIntentHidden').value = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取明細列表時發生錯誤:', error);
+                    document.getElementById('detailIntent').value = '';
+                    document.getElementById('detailIntentHidden').value = '';
+                });
+        }
+        
+        // 載入統計資訊
+        function loadStatistics() {
+            // 載入各 Intent 類別的數量
+            loadIntentCounts();
+        }
+        
+        // 載入各 Intent 類別的數量
+        function loadIntentCounts() {
+            // 直接從食物明細獲取資料，並按 master_id 分組
+            axios.get('/api/v1/food/details?page=1&pageSize=1000')
+                .then(response => {
+                    if (response.data.status === 'success') {
+                        const details = response.data.data || [];
+
+                        // 統計各 Intent 的數量，直接使用 foodmaster 資料作為統計依據
+                        const intentCounts = {
+                            breakfast: 0, // 早餐
+                            lunch: 0,     // 中餐
+                            dinner: 0,    // 晚餐
+                            snack: 0,     // 點心
+                            drink: 0,     // 飲料
+                            unspecified: 0 // 無法辨識
+                        };
+
+                        // 使用 Map 根據 master_id 分組，每個 master_id 只計算一次
+                        const masterIntentMap = new Map();
+
+                        details.forEach(item => {
+                            // 使用 master_id 作為唯一鍵
+                            const masterId = item.master_id || 'unknown';
+                            
+                            // 如果這個 master_id 還沒有 intent 紀錄，則新增
+                            if (!masterIntentMap.has(masterId)) {
+                                // 記錄 master_id 的 intent
+                                masterIntentMap.set(masterId, item.intent || 'unspecified');
+                                
+                                // 增加對應 intent 的計數
+                                switch(item.intent) {
+                                    case '早餐':
+                                        intentCounts.breakfast++;
+                                        break;
+                                    case '中餐':
+                                        intentCounts.lunch++;
+                                        break;
+                                    case '晚餐':
+                                        intentCounts.dinner++;
+                                        break;
+                                    case '點心':
+                                        intentCounts.snack++;
+                                        break;
+                                    case '飲料':
+                                        intentCounts.drink++;
+                                        break;
+                                    default:
+                                        intentCounts.unspecified++;
+                                        break;
+                                }
+                            }
+                        });
+
+                        // 更新卡片顯示
+                        document.getElementById('breakfastCount').textContent = intentCounts.breakfast;
+                        document.getElementById('lunchCount').textContent = intentCounts.lunch;
+                        document.getElementById('dinnerCount').textContent = intentCounts.dinner;
+                        document.getElementById('snackCount').textContent = intentCounts.snack;
+                        document.getElementById('drinkCount').textContent = intentCounts.drink;
+                        document.getElementById('unspecifiedCount').textContent = intentCounts.unspecified;
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取 Intent 統計資訊時發生錯誤:', error);
+                });
+        }
+        
+        // 顯示錯誤訊息
+        function showError(message) {
+            alert(message);
+        }
+        
+        // 顯示成功訊息
+        function showSuccess(message) {
+            alert(message);
+        }
+        
+        // 查看照片
+        function viewPhoto(id, userId) {
+            console.log('正在載入照片 - ID:', id, 'User ID:', userId);
+            
+            // 設置當前檢視的ID
+            document.getElementById('photoMasterId').textContent = id;
+            
+            // 清空原有照片
+            const photoContainer = document.getElementById('photoContainer');
+            photoContainer.innerHTML = '';
+            
+            // 建立載入指示器
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'text-center mb-3';
+            loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">載入中...</span></div>';
+            photoContainer.appendChild(loadingDiv);
+            
+            // 建立圖片容器
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'text-center mb-4';
+            imgContainer.style.display = 'none'; // 初始隱藏
+            
+            // 建立圖片元素
+            const imgElement = document.createElement('img');
+            imgElement.className = 'img-fluid rounded shadow';
+            imgElement.alt = '食物照片';
+            imgElement.style.maxHeight = '500px';
+            
+            // 設置圖片路徑 - 直接使用 foodmaster 的 ID 作為圖片名稱
+            const imagePath = `/static/images/${id}.jpg`;
+            console.log('圖片路徑:', imagePath);
+            imgElement.src = imagePath;
+            
+            // 圖片載入失敗時顯示預設圖片和錯誤訊息
+            imgElement.onerror = function() {
+                console.warn('無法載入圖片:', imagePath, '改用預設圖片');
+                loadingDiv.style.display = 'none';
+                imgElement.src = '/static/images/default-food.jpg';
+                document.getElementById('photoErrorMessage').style.display = 'block';
+                imgContainer.style.display = 'block';
+                
+                // 如果預設圖片也載入失敗
+                imgElement.onerror = function() {
+                    console.error('連預設圖片也無法載入');
+                    imgContainer.innerHTML = '<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>無法載入任何圖片，請檢查圖片檔案</div>';
+                    imgContainer.style.display = 'block';
+                };
+            };
+            
+            // 圖片載入成功時隱藏錯誤訊息和載入指示器
+            imgElement.onload = function() {
+                console.log('圖片載入成功:', imgElement.src);
+                loadingDiv.style.display = 'none';
+                document.getElementById('photoErrorMessage').style.display = 'none';
+                imgContainer.style.display = 'block';
+            };
+            
+            // 添加圖片到容器
+            imgContainer.appendChild(imgElement);
+            photoContainer.appendChild(imgContainer);
+        }
+        
+        // 顯示修改餐點類型Modal
+        function showIntentChangeModal(detailId, currentIntent, foodDesc) {
+            document.getElementById('intentChangeDetailId').value = detailId;
+            document.getElementById('selectedNewIntent').value = '';
+            
+            // 清除之前的選擇
+            document.querySelectorAll('.intent-selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 禁用確認按鈕
+            document.getElementById('btnConfirmIntentChange').disabled = true;
+            
+            // 顯示Modal
+            const intentChangeModal = new bootstrap.Modal(document.getElementById('intentChangeModal'));
+            intentChangeModal.show();
+        }
+        
+        // 確認修改餐點類型
+        function confirmIntentChange() {
+            const detailId = document.getElementById('intentChangeDetailId').value;
+            const newIntent = document.getElementById('selectedNewIntent').value;
+            
+            if (!newIntent) {
+                showError('請選擇新的餐點類型');
+                return;
+            }
+            
+            // 發送更新請求 - 使用專門的餐點類型修改API
+            axios.put(`/api/v1/food/details/${detailId}/intent`, {
+                intent: newIntent
+            })
+            .then(response => {
+                if (response.data.status === 'success') {
+                    // 關閉Modal
+                    const intentChangeModal = bootstrap.Modal.getInstance(document.getElementById('intentChangeModal'));
+                    intentChangeModal.hide();
+                    
+                    // 重新載入明細數據
+                    loadModalDetailData();
+                    loadDetailData();
+                    loadStatistics();
+                    
+                    showSuccess('餐點類型修改成功！');
+                } else {
+                    showError('修改餐點類型失敗: ' + (response.data.message || ''));
+                }
+            })
+            .catch(error => {
+                console.error('修改餐點類型時發生錯誤:', error);
+                showError('修改餐點類型時發生錯誤');
+            });
+        }
+        
+    </script>
+    
+    <!-- 照片查看 Modal -->
+    <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="photoModalLabel">
+                        <i class="fas fa-camera me-2"></i>食物照片 - <span id="photoMasterId"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3" id="photoErrorMessage" style="display: none;">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            原始照片無法載入，目前顯示預設圖片。<br>
+                            <small class="text-muted">可能原因：圖片檔案不存在或路徑錯誤</small>
+                        </div>
+                    </div>
+                    <div id="photoContainer" class="text-center mb-4">
+                        <!-- 主圖片將通過JavaScript動態載入 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

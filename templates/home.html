@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}超級管理員 - 首頁{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .hero-section {
+        background-color: #fff;
+        padding: 60px 0;
+        margin-bottom: 40px;
+    }
+    
+    .hero-image {
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+        margin-bottom: 20px;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .card-title {
+        color: var(--primary-color);
+        font-weight: 700;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 30px 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <!-- 主要內容區域 -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="mb-4">專業的管理系統</h2>
+                    <p class="lead mb-4">提供全方位的資料管理解決方案，高效便捷的操作體驗，助您輕鬆管理各類數據。</p>
+                    <!-- 開始使用按鈕已移除 -->
+                </div>
+                <div class="col-md-6">
+                    <img src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="專業管理" class="hero-image">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 卡片區域 -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">食物管理系統</h5>
+                        <p class="card-text">全面的食物數據管理，提供詳細的營養成分分析和飲食建議。</p>
+                        <a href="/food" class="btn btn-primary">立即前往</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">用戶數據管理</h5>
+                        <p class="card-text">管理用戶資料、分析使用者行為，提供個性化的服務推薦。</p>
+                        <a href="#" class="btn btn-primary">立即前往</a>
+                    </div>
+                </div>
+            </div>
+            <!-- 系統分析報表卡片已移除 -->
+    </div>
+</div>
+{% endblock %}
