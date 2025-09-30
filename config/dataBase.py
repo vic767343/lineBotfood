@@ -10,6 +10,6 @@ db_config = {
     'serverName': 'localhost',
     'databaseName': 'Food',
     'userName': 'sa',
-    'password': os.getenv('DATABASE_PASSWORD', 'Vic861223'),  # Use environment variable
+    'password': os.getenv('PASSWORD'),  # Use environment variable
     'driver': 'ODBC Driver 18 for SQL Server'
 }
