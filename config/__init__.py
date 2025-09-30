@@ -1,6 +1,10 @@
 import json
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 def get_config():
     """
@@ -11,4 +15,10 @@ def get_config():
     """
     config_path = Path(__file__).parent / 'config.json'
     with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        config = json.load(f)
+    
+    # Override sensitive data with environment variables
+    if 'gemini' in config and 'apikey' in config['gemini']:
+        config['gemini']['apikey'] = os.getenv('GEMINI_API_KEY', config['gemini']['apikey'])
+    
+    return config
