@@ -1,0 +1,68 @@
+{
+  "agents": {
+    "strategic-planner": {
+      "enabled": true,
+      "description": "互動需求分析、里程碑計畫與依賴關係管理",
+      "capabilities": [
+        "analyze_requirements",
+        "create_milestones",
+        "manage_dependencies"
+      ]
+    },
+    "steering-architect": {
+      "enabled": true,
+      "description": "產品藍圖、技術選型與結構規範",
+      "capabilities": [
+        "create_blueprint",
+        "select_technology",
+        "define_specification"
+      ]
+    },
+    "task-executor": {
+      "enabled": true,
+      "description": "讀取規格並實作專案（腳手架、設定、測試框架等）",
+      "capabilities": [
+        "read_specification",
+        "create_scaffolding",
+        "setup_configuration",
+        "setup_test_framework",
+        "execute_task"
+      ]
+    }
+  },
+  "workflows": {
+    "new_project": {
+      "description": "新專案建立流程",
+      "steps": [
+        {
+          "agent": "strategic-planner",
+          "action": "analyze_requirements"
+        },
+        {
+          "agent": "strategic-planner",
+          "action": "create_milestones"
+        },
+        {
+          "agent": "steering-architect",
+          "action": "create_blueprint"
+        },
+        {
+          "agent": "steering-architect",
+          "action": "select_technology"
+        },
+        {
+          "agent": "task-executor",
+          "action": "create_scaffolding"
+        },
+        {
+          "agent": "task-executor",
+          "action": "setup_test_framework"
+        }
+      ]
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  }
+}
