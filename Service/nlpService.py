@@ -1,4 +1,7 @@
 import logging
+from typing import Any
+import httpx
+from mcp.server.fastmcp import FastMCP
 import json
 import google.generativeai as genai
 from config import get_config
@@ -10,11 +13,8 @@ from typing import Dict, Any, Optional, List
 from Service.managerCalService import ManagerCalService
 from Service.FoodDataService import FoodDataService
 from Service.PhysInfoDataService import PhysInfoDataService
-from Service.OptimizedErrorHandler import OptimizedErrorHandler
-from Service.PerformanceAPI import performance_monitor
-from Service.SimpleCache import nlp_cache, user_cache
-from Service.AsyncProcessor import async_processor
 from Service.ConnectionFactory import ConnectionFactory
+
 
 # 設置日誌記錄
 logger = logging.getLogger(__name__)
@@ -28,9 +28,6 @@ class NLPService:
         self.chat_prompt = chatPrompt
         self.chat_search_prompt = chatSearchPrompt
         self.image_process_reply_prompt = imageProcessReplyprompt
-        
-        # 初始化優化的錯誤處理器
-        self.error_handler = OptimizedErrorHandler(__name__)
         
         # 混合檢測架構配置
         self.enable_unified_detection = True  # 是否啟用統一檢測
@@ -234,23 +231,11 @@ class NLPService:
             self._phys_info_service = PhysInfoDataService()
         return self._phys_info_service
     
-    @OptimizedErrorHandler(logger_name=__name__).fast_error_handler("統一意圖檢測失敗")
     def unified_intent_detection(self, message_text: str) -> Dict[str, Any]:
         """
         統一的意圖檢測，一次 API 調用識別所有可能的意圖
         包含快取機制以提高響應速度
         """
-        logger.info(f"開始統一意圖檢測: {message_text}")
-        
-        # 生成快取鍵值
-        import hashlib
-        cache_key = f"intent_{hashlib.md5(message_text.encode()).hexdigest()}"
-        
-        # 檢查快取
-        cached_result = nlp_cache.get(cache_key)
-        if cached_result:
-            logger.info(f"使用快取的意圖檢測結果: {message_text[:30]}...")
-            return cached_result
         
         # 使用 Gemini 進行統一意圖解析
         model = genai.GenerativeModel(
@@ -287,9 +272,7 @@ class NLPService:
             result['success'] = True
             result['method'] = 'unified'
             
-            # 將結果存入快取（快取 10 分鐘）
-            nlp_cache.set(cache_key, result)
-            logger.info(f"統一意圖檢測成功並已快取: {result.get('primary_intent')}")
+            logger.info(f"統一意圖檢測成功: {result.get('primary_intent')}")
             return result
         
         logger.warning("統一意圖檢測未能獲取有效結果")
@@ -359,7 +342,6 @@ class NLPService:
         logger.info(f"快速篩選結果: {possible_intents}")
         return possible_intents
 
-    @OptimizedErrorHandler(logger_name=__name__).fast_error_handler("智能意圖檢測失敗")
     def smart_intent_detection(self, message_text: str) -> Dict[str, Any]:
         """
         智能意圖檢測：結合快速篩選和精確檢測
@@ -540,15 +522,6 @@ class NLPService:
         包含快取機制以提高響應速度
         """
         try:
-            # 生成快取鍵值（基於用戶基本資料和過敏食物）
-            cache_key = f"diet_plan_{user_id}_{cal_result.get('bmi', 0)}_{cal_result.get('bmr', 0)}_{sorted(allergic_foods)}"
-            
-            # 檢查快取
-            cached_result = nlp_cache.get(cache_key)
-            if cached_result:
-                logger.info(f"使用快取的飲食規劃結果: {user_id}")
-                return cached_result
-        
             
             # 準備提示詞
             prompt = f"""
@@ -604,15 +577,13 @@ class NLPService:
             response = model.generate_content(prompt)
             result = response.text
             
-            # 將結果存入快取（快取 10 分鐘）
-            nlp_cache.set(cache_key, result)
-            logger.info(f"已快取飲食規劃結果: {user_id}")
+            logger.info(f"已生成飲食規劃結果: {user_id}")
             
             return result
             
         except Exception as e:
             logger.error(f"生成飲食規劃失敗: {str(e)}")
-            return f"抱歉，生成飲食規劃時發生錯誤: {str(e)}"    @OptimizedErrorHandler(logger_name=__name__).fast_error_handler("處理您的訊息時發生錯誤，請稍後再試")
+            return f"抱歉，生成飲食規劃時發生錯誤: {str(e)}"
     @performance_monitor.timing_decorator("nlpProcess")
     def nlpProcess(self, user_id, message_text):
         """
@@ -697,7 +668,6 @@ class NLPService:
         """
         return self.process_physical_info(user_id, message_text)
 
-    @OptimizedErrorHandler(logger_name=__name__).fast_error_handler("一般對話處理失敗")
     def _process_general_chat(self, user_id: str, message_text: str) -> Dict[str, Any]:
         """
         處理一般對話
@@ -1130,15 +1100,6 @@ class NLPService:
         try:
             logger.info(f"開始檢查訊息是否有卡路里管理意圖: {message_text}")
             
-            # 生成快取鍵值
-            import hashlib
-            cache_key = f"calorie_intent_{hashlib.md5(message_text.encode()).hexdigest()}"
-            
-            # 檢查快取
-            cached_result = nlp_cache.get(cache_key)
-            if cached_result:
-                logger.info(f"使用快取的卡路里意圖檢測結果: {message_text[:30]}...")
-                return cached_result
             
             # 使用 Gemini 進行意圖解析
             model = genai.GenerativeModel(
@@ -1179,18 +1140,15 @@ class NLPService:
                 # 使用 function_response.args 直接作為結果
                 result = dict(function_response.args)  # 轉換為普通字典
                 
-                # 將結果存入快取（快取 10 分鐘）
-                nlp_cache.set(cache_key, result)
-                logger.info(f"檢測到卡路里管理意圖並已快取: {result}")
+                logger.info(f"檢測到卡路里管理意圖: {result}")
                 return result
             
-            # 未檢測到意圖的結果也要快取
+            # 未檢測到意圖的結果
             no_intent_result = {
                 "has_calorie_intent": False,
                 "intent_type": "none",
                 "confidence": 0.0
             }
-            nlp_cache.set(cache_key, no_intent_result)
             logger.info("未檢測到卡路里管理意圖")
             return no_intent_result
                 

@@ -10,7 +10,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # 導入服務
 from Service.FoodDataService import FoodDataService
-from Service.OptimizedErrorHandler import OptimizedErrorHandler
 
 # 創建藍圖
 food_rest_bp = Blueprint('food_rest', __name__, url_prefix='/api/v1/food')
@@ -24,13 +23,10 @@ def get_food_data_service():
         _food_data_service = FoodDataService()
     return _food_data_service
 
-error_handler = OptimizedErrorHandler(__name__)
-
 # 設置日誌記錄
 logger = logging.getLogger(__name__)
 
 @food_rest_bp.route('/master', methods=['GET'])
-@error_handler.api_error_handler()
 def get_food_masters():
     """獲取食物主檔列表，支援分頁和搜尋"""
     # 獲取分頁參數

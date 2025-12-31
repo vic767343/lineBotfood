@@ -16,7 +16,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 # 導入連接工廠
 from Service.ConnectionFactory import ConnectionFactory
 # 導入優化的錯誤處理器和性能監控
-from Service.OptimizedErrorHandler import OptimizedErrorHandler
 from Service.PerformanceAPI import PerformanceMonitor
 
 # 設置日誌記錄
@@ -33,23 +32,10 @@ class FoodDataService:
         logger.info("初始化食物資料服務")
         
         # 初始化錯誤處理器和性能監控
-        self.error_handler = OptimizedErrorHandler(__name__)
         self.performance_monitor = PerformanceMonitor()
         
         # 檢查食物主檔及明細檔資料表是否存在，如果不存在則建立
         self._ensure_food_master_details_table_exists()
-    
-    @property
-    def error_handler(self):
-        """錯誤處理器的 getter"""
-        if not hasattr(self, '_error_handler'):
-            self._error_handler = OptimizedErrorHandler(__name__)
-        return self._error_handler
-    
-    @error_handler.setter
-    def error_handler(self, value):
-        """錯誤處理器的 setter"""
-        self._error_handler = value
     
     @property
     def performance_monitor(self):

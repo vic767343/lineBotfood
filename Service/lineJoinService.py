@@ -93,42 +93,4 @@ class LineJoinService:
             self.logger.error(f"Error getting group summary: {str(e)}")
             return None
             
-    def send_reply(self, reply_token: str, messages: list) -> bool:
-        """發送回覆訊息給使用者"""
-        try:
-            # 檢查 reply_token 是否有效
-            if not reply_token:
-                self.logger.warning("嘗試使用空的 reply_token 發送訊息")
-                return False
-                
-            # 確保 messages 是列表
-            if not isinstance(messages, list):
-                messages = [messages]
-                
-            data = {
-                'replyToken': reply_token,
-                'messages': messages
-            }
-            
-            self.logger.info(f"發送回覆訊息: 目標token={reply_token[:10]}..., 訊息數量={len(messages)}")
-            
-            response = requests.post(
-                sendReplyMessageUrl,
-                headers=self.headers,
-                data=json.dumps(data)
-            )
-            
-            if response.status_code == 200:
-                self.logger.info("回覆訊息發送成功")
-                return True
-            elif response.status_code == 400:
-                # replyToken 已被使用或無效
-                self.logger.warning(f"replyToken 無效或已使用: {response.status_code}, {response.text}")
-                return False
-            else:
-                self.logger.error(f"發送回覆訊息失敗: {response.status_code}, {response.text}")
-                return False
-                
-        except Exception as e:
-            self.logger.error(f"發送回覆訊息時發生錯誤: {str(e)}")
-            return False
+# TODO send reply need trainsfer to event bus and commit to adapter pattern

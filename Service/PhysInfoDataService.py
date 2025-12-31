@@ -14,8 +14,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # 導入資料庫連接工廠和優化錯誤處理器
 from Service.ConnectionFactory import ConnectionFactory
-from Service.OptimizedErrorHandler import OptimizedErrorHandler
-from Service.SimpleCache import user_cache
 
 # 設置日誌記錄
 logger = logging.getLogger(__name__)
@@ -27,8 +25,6 @@ class PhysInfoDataService:
     """
     
     def __init__(self):
-        # 初始化優化的錯誤處理器
-        self.error_handler = OptimizedErrorHandler(__name__)
         # 預載常用用戶資料到快取
         self.preload_cache()
     
@@ -56,108 +52,37 @@ class PhysInfoDataService:
             
             if recent_users:
                 user_ids = [user[0] for user in recent_users]
-                logger.info(f"開始預載 {len(user_ids)} 個用戶的身體資訊到快取")
-                
-                # 使用快取的預載功能
-                user_cache.preload_common_data(
-                    preload_func=self._load_user_data_for_cache,
-                    keys=user_ids
-                )
+                logger.info(f"找到 {len(user_ids)} 個近期活躍用戶")
                 
         except Exception as e:
-            logger.warning(f"預載快取時發生錯誤: {str(e)}")
+            logger.warning(f"獲取近期活躍用戶時發生錯誤: {str(e)}")
     
-    def _load_user_data_for_cache(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """
-        為快取預載載入用戶資料
-        """
-        try:
-            # 直接查詢資料庫，不使用快取（避免遞迴）
-            connection = ConnectionFactory.create_connection()
-            if not connection:
-                return None
-                
-            cursor = connection.cursor()
-            query = """
-            SELECT id, master_id, gender, age, height, weight, allergic_foods, 
-                   createDate, updateDate
-            FROM physInfo
-            WHERE master_id = ?
-            """
-            
-            cursor.execute(query, (user_id,))
-            result = cursor.fetchone()
-            cursor.close()
-            ConnectionFactory.close_connection(connection)
-            
-            if result:
-                return {
-                    'id': result[0],
-                    'master_id': result[1],
-                    'gender': result[2],
-                    'age': result[3],
-                    'height': result[4],
-                    'weight': result[5],
-                    'allergic_foods': json.loads(result[6]) if result[6] else [],
-                    'createDate': result[7],
-                    'updateDate': result[8]
-                }
-            return None
-            
-        except Exception as e:
-            logger.warning(f"載入用戶 {user_id} 資料失敗: {str(e)}")
-            return None
     
     def refresh_user_cache(self, user_id: str) -> bool:
         """
-        手動刷新特定用戶的快取
+        獲取特定用戶的最新資料
         
         Args:
             user_id: 用戶ID
             
         Returns:
-            bool: 是否成功刷新
+            bool: 是否成功獲取資料
         """
         try:
-            # 清除現有快取
-            cache_key_master = f"phys_info_{user_id}"
-            cache_key_user = f"phys_info_user_{user_id}"
-            user_cache.cache.pop(cache_key_master, None)
-            user_cache.cache.pop(cache_key_user, None)
-            
-            # 重新載入資料到快取
-            user_data = self._load_user_data_for_cache(user_id)
-            if user_data:
-                user_cache.set(cache_key_master, user_data)
-                user_cache.set(cache_key_user, user_data)
-                logger.info(f"成功刷新用戶 {user_id} 的快取")
+            # 直接查詢資料庫獲取最新資料
+            result = self.get_phys_info(user_id)
+            if result["status"] == "success":
+                logger.info(f"成功獲取用戶 {user_id} 的最新資料")
                 return True
             else:
-                logger.warning(f"無法刷新用戶 {user_id} 的快取：找不到資料")
+                logger.warning(f"無法獲取用戶 {user_id} 的資料: {result['result']}")
                 return False
                 
         except Exception as e:
-            logger.error(f"刷新用戶 {user_id} 快取時發生錯誤: {str(e)}")
+            logger.error(f"獲取用戶 {user_id} 資料時發生錯誤: {str(e)}")
             return False
     
-    def get_cache_stats(self) -> Dict[str, Any]:
-        """
-        獲取快取統計資訊
-        
-        Returns:
-            Dict: 快取統計
-        """
-        try:
-            stats = user_cache.get_stats()
-            # 計算physinfo相關的快取數量
-            phys_cache_count = len([k for k in user_cache.cache.keys() if k.startswith('phys_info')])
-            stats['phys_info_cache_count'] = phys_cache_count
-            return stats
-        except Exception as e:
-            logger.error(f"獲取快取統計時發生錯誤: {str(e)}")
-            return {"error": str(e)}
     
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法建立使用者身體資訊")
     def create_phys_info(self, master_id: str, gender: str, age: int, height: float, weight: float, allergic_foods: List[str] = None) -> Dict[str, Any]:
         """
         建立使用者身體資訊
@@ -241,20 +166,11 @@ class PhysInfoDataService:
             
         ConnectionFactory.close_connection(connection)
         
-        # 如果操作成功，清除相關快取（因為可能是更新現有資料）
-        if result:
-            cache_key_master = f"phys_info_{master_id}"
-            cache_key_user = f"phys_info_user_{master_id}"
-            user_cache.cache.pop(cache_key_master, None)
-            user_cache.cache.pop(cache_key_user, None)
-            logger.info(f"已清除用戶 {master_id} 的快取")
-        
         return {
             "status": "success" if result else "error",
             "result": result if result else "操作失敗"
         }
     
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法獲取使用者身體資訊")
     def get_phys_info(self, master_id: str) -> Dict[str, Any]:
         """
         獲取使用者身體資訊
@@ -268,13 +184,6 @@ class PhysInfoDataService:
         # 快速驗證
         if not master_id:
             return {"status": "error", "result": "主檔ID不能為空"}
-        
-        # 先檢查快取
-        cache_key = f"phys_info_{master_id}"
-        cached_result = user_cache.get(cache_key)
-        if cached_result is not None:
-            logger.info(f"從快取獲取用戶 {master_id} 的身體資訊")
-            return {"status": "success", "result": cached_result}
         
         connection = ConnectionFactory.create_connection()
         if not connection:
@@ -310,10 +219,6 @@ class PhysInfoDataService:
                 'updateDate': result[8]
             }
             
-            # 將結果儲存到快取
-            user_cache.set(cache_key, phys_info)
-            logger.info(f"將用戶 {master_id} 的身體資訊儲存到快取")
-            
             return {"status": "success", "result": phys_info}
             
         except Exception as e:
@@ -323,7 +228,6 @@ class PhysInfoDataService:
         finally:
             ConnectionFactory.close_connection(connection)
     
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法更新使用者身體資訊")
     def update_phys_info(self, master_id: str, **kwargs) -> Dict[str, Any]:
         """
         更新使用者身體資訊
@@ -380,20 +284,11 @@ class PhysInfoDataService:
         result = ConnectionFactory.execute_query(connection, update_query, tuple(params))
         ConnectionFactory.close_connection(connection)
         
-        # 如果更新成功，清除相關快取
-        if result:
-            cache_key_master = f"phys_info_{master_id}"
-            cache_key_user = f"phys_info_user_{master_id}"
-            user_cache.cache.pop(cache_key_master, None)
-            user_cache.cache.pop(cache_key_user, None)
-            logger.info(f"已清除用戶 {master_id} 的快取")
-        
         return {
             "status": "success" if result else "error",
             "result": result if result else "更新失敗"
         }
     
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法刪除使用者身體資訊")
     def delete_phys_info(self, master_id: str) -> Dict[str, Any]:
         """
         刪除使用者身體資訊
@@ -417,20 +312,11 @@ class PhysInfoDataService:
         result = ConnectionFactory.execute_query(connection, delete_query, (master_id,))
         ConnectionFactory.close_connection(connection)
         
-        # 如果刪除成功，清除相關快取
-        if result:
-            cache_key_master = f"phys_info_{master_id}"
-            cache_key_user = f"phys_info_user_{master_id}"
-            user_cache.cache.pop(cache_key_master, None)
-            user_cache.cache.pop(cache_key_user, None)
-            logger.info(f"已清除用戶 {master_id} 的快取")
-        
         return {
             "status": "success" if result else "error",
             "result": result if result else "刪除失敗"
         }
     
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法獲取所有使用者身體資訊")
     def get_all_phys_info(self) -> Dict[str, Any]:
         """
         獲取所有使用者身體資訊
@@ -473,7 +359,6 @@ class PhysInfoDataService:
             
         return {"status": "success", "result": phys_info_list}
             
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法計算BMI值")
     def calculate_bmi(self, master_id: str) -> Dict[str, Any]:
         """
         計算使用者的BMI值
@@ -503,7 +388,6 @@ class PhysInfoDataService:
         bmi = weight_kg / (height_m * height_m)
         return {"status": "success", "result": round(bmi, 2)}
             
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法計算基礎代謝率")
     def calculate_bmr(self, master_id: str) -> Dict[str, Any]:
         """
         計算使用者的基礎代謝率(BMR)
@@ -538,7 +422,6 @@ class PhysInfoDataService:
             
         return {"status": "success", "result": round(bmr, 2)}
         
-    @OptimizedErrorHandler(__name__).fast_error_handler("無法獲取使用者身體資訊")
     def get_phys_info_by_user_id(self, user_id: str) -> Dict[str, Any]:
         """
         根據用戶ID獲取使用者身體資訊
@@ -552,13 +435,6 @@ class PhysInfoDataService:
         # 快速驗證
         if not user_id:
             return {"status": "error", "result": "用戶ID不能為空"}
-        
-        # 先檢查快取
-        cache_key = f"phys_info_user_{user_id}"
-        cached_result = user_cache.get(cache_key)
-        if cached_result is not None:
-            logger.info(f"從快取獲取用戶 {user_id} 的身體資訊")
-            return {"status": "success", "result": cached_result}
         
         connection = ConnectionFactory.create_connection()
         if not connection:
@@ -607,10 +483,6 @@ class PhysInfoDataService:
                     'updateDate': result[8]
                 }
                 
-                # 將結果儲存到快取
-                user_cache.set(cache_key, phys_info)
-                logger.info(f"將用戶 {user_id} 的身體資訊儲存到快取")
-                
                 return {"status": "success", "result": phys_info}
             
             master_id = master_result[0]
@@ -645,10 +517,6 @@ class PhysInfoDataService:
                 'createDate': result[7],
                 'updateDate': result[8]
             }
-            
-            # 將結果儲存到快取
-            user_cache.set(cache_key, phys_info)
-            logger.info(f"將用戶 {user_id} 的身體資訊儲存到快取")
             
             return {"status": "success", "result": phys_info}
             
