@@ -1,10 +1,10 @@
 """
-Steering Architect Agent
+架構設計代理
 
-Responsibilities:
-- Product blueprint design
-- Technology selection
-- Structural specifications
+職責：
+- 產品藍圖設計
+- 技術選型
+- 結構規範
 """
 
 from typing import Dict, Any, List
@@ -13,10 +13,10 @@ from .base_agent import BaseAgent
 
 class SteeringArchitect(BaseAgent):
     """
-    Steering Architect Agent that handles:
-    - Product blueprint design
-    - Technology selection and evaluation
-    - Structural specifications and standards
+    架構設計代理，負責：
+    - 產品藍圖設計
+    - 技術選型與評估
+    - 結構規範與標準
     """
     
     def __init__(self):
@@ -30,15 +30,15 @@ class SteeringArchitect(BaseAgent):
     
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Process architecture requests.
+        處理架構請求。
         
         Args:
-            input_data: Dictionary with keys:
+            input_data: 包含以下鍵值的字典：
                 - action: 'create_blueprint' | 'select_technology' | 'define_specification'
-                - data: Relevant data for the action
+                - data: 該動作的相關資料
                 
         Returns:
-            Dictionary containing processing results
+            包含處理結果的字典
         """
         action = input_data.get("action")
         data = input_data.get("data", {})
@@ -57,13 +57,13 @@ class SteeringArchitect(BaseAgent):
     
     def _create_blueprint(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Create product blueprint.
+        建立產品藍圖。
         
         Args:
-            data: Dictionary containing blueprint information
+            data: 包含藍圖資訊的字典
             
         Returns:
-            Blueprint creation results
+            藍圖建立結果
         """
         blueprint = {
             "id": len(self.blueprints) + 1,
@@ -96,13 +96,13 @@ class SteeringArchitect(BaseAgent):
     
     def _select_technology(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Select and evaluate technology.
+        選擇並評估技術。
         
         Args:
-            data: Dictionary containing technology information
+            data: 包含技術資訊的字典
             
         Returns:
-            Technology selection results
+            技術選型結果
         """
         category = data.get("category", "")
         technology = {
@@ -137,13 +137,13 @@ class SteeringArchitect(BaseAgent):
     
     def _define_specification(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Define structural specification.
+        定義結構規範。
         
         Args:
-            data: Dictionary containing specification information
+            data: 包含規範資訊的字典
             
         Returns:
-            Specification definition results
+            規範定義結果
         """
         specification = {
             "id": len(self.specifications) + 1,
@@ -171,19 +171,19 @@ class SteeringArchitect(BaseAgent):
         }
     
     def get_technology_stack(self) -> Dict[str, List[Dict[str, Any]]]:
-        """Get the complete technology stack."""
+        """取得完整的技術堆疊。"""
         return self.technologies.copy()
     
     def get_all_blueprints(self) -> List[Dict[str, Any]]:
-        """Get all created blueprints."""
+        """取得所有已建立的藍圖。"""
         return self.blueprints.copy()
     
     def get_all_specifications(self) -> List[Dict[str, Any]]:
-        """Get all defined specifications."""
+        """取得所有已定義的規範。"""
         return self.specifications.copy()
     
     def get_architecture_summary(self) -> Dict[str, Any]:
-        """Get a summary of the architecture decisions."""
+        """取得架構決策的摘要。"""
         return {
             "blueprints_count": len(self.blueprints),
             "technology_categories": list(self.technologies.keys()),

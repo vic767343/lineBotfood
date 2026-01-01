@@ -1,10 +1,10 @@
 """
-Agents package for project planning and execution.
+專案規劃與執行的代理套件。
 
-This package contains three specialized agents:
-- strategic-planner: Interaction requirement analysis, milestone planning, and dependency relationships
-- steering-architect: Product blueprint, technology selection, and structural specifications
-- task-executor: Reads specifications and implements projects (scaffolding, configuration, test framework)
+本套件包含三個專門的代理：
+- strategic-planner: 互動需求分析、里程碑規劃與依賴關係管理
+- steering-architect: 產品藍圖、技術選型與結構規範
+- task-executor: 讀取規格並實作專案（腳手架、配置、測試框架）
 """
 
 from .strategic_planner import StrategicPlanner

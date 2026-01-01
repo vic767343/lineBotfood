@@ -1,10 +1,10 @@
 """
-Task Executor Agent
+任務執行代理
 
-Responsibilities:
-- Reading specifications
-- Implementing projects (scaffolding, configuration, test framework)
-- Executing development tasks
+職責：
+- 讀取規格
+- 實作專案（腳手架、配置、測試框架）
+- 執行開發任務
 """
 
 from typing import Dict, Any, List
@@ -15,10 +15,10 @@ import json
 
 class TaskExecutor(BaseAgent):
     """
-    Task Executor Agent that handles:
-    - Reading and parsing specifications
-    - Project implementation (scaffolding, configuration, test framework)
-    - Task execution and tracking
+    任務執行代理，負責：
+    - 讀取和解析規格
+    - 專案實作（腳手架、配置、測試框架）
+    - 任務執行與追蹤
     """
     
     def __init__(self):
@@ -32,15 +32,15 @@ class TaskExecutor(BaseAgent):
     
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Process task execution requests.
+        處理任務執行請求。
         
         Args:
-            input_data: Dictionary with keys:
+            input_data: 包含以下鍵值的字典：
                 - action: 'read_specification' | 'create_scaffolding' | 'setup_configuration' | 'setup_test_framework' | 'execute_task'
-                - data: Relevant data for the action
+                - data: 該動作的相關資料
                 
         Returns:
-            Dictionary containing processing results
+            包含處理結果的字典
         """
         action = input_data.get("action")
         data = input_data.get("data", {})
@@ -63,13 +63,13 @@ class TaskExecutor(BaseAgent):
     
     def _read_specification(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Read and parse specification.
+        讀取並解析規格。
         
         Args:
-            data: Dictionary containing specification information
+            data: 包含規格資訊的字典
             
         Returns:
-            Parsed specification results
+            解析後的規格結果
         """
         spec = {
             "id": data.get("spec_id", ""),
@@ -95,13 +95,13 @@ class TaskExecutor(BaseAgent):
     
     def _create_scaffolding(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Create project scaffolding.
+        建立專案腳手架。
         
         Args:
-            data: Dictionary containing scaffolding information
+            data: 包含腳手架資訊的字典
             
         Returns:
-            Scaffolding creation results
+            腳手架建立結果
         """
         scaffolding = {
             "id": len(self.implementations) + 1,
@@ -150,13 +150,13 @@ class TaskExecutor(BaseAgent):
     
     def _setup_configuration(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Setup project configuration.
+        設定專案配置。
         
         Args:
-            data: Dictionary containing configuration information
+            data: 包含配置資訊的字典
             
         Returns:
-            Configuration setup results
+            配置設定結果
         """
         config_type = data.get("type", "")
         config = {
@@ -183,13 +183,13 @@ class TaskExecutor(BaseAgent):
     
     def _setup_test_framework(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Setup test framework.
+        設定測試框架。
         
         Args:
-            data: Dictionary containing test framework information
+            data: 包含測試框架資訊的字典
             
         Returns:
-            Test framework setup results
+            測試框架設定結果
         """
         framework = {
             "name": data.get("framework_name", ""),
@@ -221,13 +221,13 @@ class TaskExecutor(BaseAgent):
     
     def _execute_task(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Execute a development task.
+        執行開發任務。
         
         Args:
-            data: Dictionary containing task information
+            data: 包含任務資訊的字典
             
         Returns:
-            Task execution results
+            任務執行結果
         """
         task = {
             "id": len(self.tasks) + 1,
@@ -271,7 +271,7 @@ class TaskExecutor(BaseAgent):
         }
     
     def _parse_tasks_from_spec(self, content: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Parse tasks from specification content."""
+        """從規格內容中解析任務。"""
         tasks = []
         
         # Extract tasks from various specification formats
@@ -288,19 +288,19 @@ class TaskExecutor(BaseAgent):
         return tasks
     
     def get_all_tasks(self) -> List[Dict[str, Any]]:
-        """Get all executed tasks."""
+        """取得所有已執行的任務。"""
         return self.tasks.copy()
     
     def get_all_implementations(self) -> List[Dict[str, Any]]:
-        """Get all implementations (scaffolding, etc.)."""
+        """取得所有實作（腳手架等）。"""
         return self.implementations.copy()
     
     def get_all_configurations(self) -> Dict[str, Any]:
-        """Get all configurations."""
+        """取得所有配置。"""
         return self.configurations.copy()
     
     def get_task_status(self, task_id: int) -> Dict[str, Any]:
-        """Get status of a specific task."""
+        """取得特定任務的狀態。"""
         for task in self.tasks:
             if task["id"] == task_id:
                 return {

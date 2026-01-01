@@ -1,10 +1,10 @@
 """
-Strategic Planner Agent
+戰略規劃代理
 
-Responsibilities:
-- Interaction requirement analysis
-- Milestone planning
-- Dependency relationship management
+職責：
+- 互動需求分析
+- 里程碑規劃
+- 依賴關係管理
 """
 
 from typing import Dict, Any, List
@@ -13,10 +13,10 @@ from .base_agent import BaseAgent
 
 class StrategicPlanner(BaseAgent):
     """
-    Strategic Planner Agent that handles:
-    - Interaction requirement analysis
-    - Milestone planning
-    - Dependency relationships
+    戰略規劃代理，負責：
+    - 互動需求分析
+    - 里程碑規劃
+    - 依賴關係管理
     """
     
     def __init__(self):
@@ -30,15 +30,15 @@ class StrategicPlanner(BaseAgent):
     
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Process strategic planning requests.
+        處理戰略規劃請求。
         
         Args:
-            input_data: Dictionary with keys:
+            input_data: 包含以下鍵值的字典：
                 - action: 'analyze_requirements' | 'create_milestones' | 'manage_dependencies'
-                - data: Relevant data for the action
+                - data: 該動作的相關資料
                 
         Returns:
-            Dictionary containing processing results
+            包含處理結果的字典
         """
         action = input_data.get("action")
         data = input_data.get("data", {})
@@ -57,13 +57,13 @@ class StrategicPlanner(BaseAgent):
     
     def _analyze_requirements(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Analyze interaction requirements.
+        分析互動需求。
         
         Args:
-            data: Dictionary containing requirement information
+            data: 包含需求資訊的字典
             
         Returns:
-            Analysis results
+            分析結果
         """
         requirement = {
             "id": len(self.requirements) + 1,
@@ -93,13 +93,13 @@ class StrategicPlanner(BaseAgent):
     
     def _create_milestones(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Create project milestones.
+        建立專案里程碑。
         
         Args:
-            data: Dictionary containing milestone information
+            data: 包含里程碑資訊的字典
             
         Returns:
-            Milestone creation results
+            里程碑建立結果
         """
         milestone = {
             "id": len(self.milestones) + 1,
@@ -125,13 +125,13 @@ class StrategicPlanner(BaseAgent):
     
     def _manage_dependencies(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Manage dependency relationships.
+        管理依賴關係。
         
         Args:
-            data: Dictionary containing dependency information
+            data: 包含依賴資訊的字典
             
         Returns:
-            Dependency management results
+            依賴管理結果
         """
         item_id = data.get("item_id", "")
         depends_on = data.get("depends_on", [])
@@ -156,7 +156,7 @@ class StrategicPlanner(BaseAgent):
         }
     
     def _assess_complexity(self, data: Dict[str, Any]) -> str:
-        """Assess the complexity of a requirement."""
+        """評估需求的複雜度。"""
         interactions = data.get("interactions", [])
         stakeholders = data.get("stakeholders", [])
         
@@ -170,7 +170,7 @@ class StrategicPlanner(BaseAgent):
             return "high"
     
     def _identify_risks(self, data: Dict[str, Any]) -> List[str]:
-        """Identify potential risks in a requirement."""
+        """識別需求中的潛在風險。"""
         risks = []
         
         if not data.get("stakeholders"):
@@ -185,7 +185,7 @@ class StrategicPlanner(BaseAgent):
         return risks
     
     def _get_dependency_chain(self, item_id: str) -> List[str]:
-        """Get the full dependency chain for an item."""
+        """取得項目的完整依賴鏈。"""
         chain = []
         visited = set()
         
@@ -203,13 +203,13 @@ class StrategicPlanner(BaseAgent):
         return chain
     
     def get_all_requirements(self) -> List[Dict[str, Any]]:
-        """Get all analyzed requirements."""
+        """取得所有已分析的需求。"""
         return self.requirements.copy()
     
     def get_all_milestones(self) -> List[Dict[str, Any]]:
-        """Get all created milestones."""
+        """取得所有已建立的里程碑。"""
         return self.milestones.copy()
     
     def get_all_dependencies(self) -> Dict[str, List[str]]:
-        """Get all dependency relationships."""
+        """取得所有依賴關係。"""
         return self.dependencies.copy()

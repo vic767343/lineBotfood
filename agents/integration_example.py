@@ -1,8 +1,8 @@
 """
-Integration example: Using agents with the LINE Bot food tracking system.
+整合範例：將代理與 LINE Bot 食物追蹤系統整合使用。
 
-This file demonstrates how to integrate the three agents into the existing
-LINE Bot food tracking application for project planning and feature development.
+本檔案展示如何將三個代理整合到現有的 LINE Bot 食物追蹤應用程式中，
+用於專案規劃和功能開發。
 """
 
 import sys
@@ -16,10 +16,10 @@ from agents import AgentManager
 
 
 class ProjectPlanningHelper:
-    """Helper class to use agents for planning new features in the LINE Bot."""
+    """協助使用代理來規劃 LINE Bot 新功能的輔助類別。"""
     
     def __init__(self):
-        """Initialize the planning helper with the agent manager."""
+        """使用代理管理器初始化規劃輔助工具。"""
         self.manager = AgentManager()
         self.planner = self.manager.get_agent("strategic-planner")
         self.architect = self.manager.get_agent("steering-architect")
@@ -27,14 +27,14 @@ class ProjectPlanningHelper:
     
     def plan_new_feature(self, feature_name: str, feature_description: str):
         """
-        Complete planning workflow for a new feature.
+        為新功能執行完整的規劃工作流程。
         
         Args:
-            feature_name: Name of the new feature
-            feature_description: Description of what the feature does
+            feature_name: 新功能的名稱
+            feature_description: 功能的描述
             
         Returns:
-            Complete planning results
+            完整的規劃結果
         """
         results = {
             "feature": feature_name,
@@ -136,7 +136,7 @@ class ProjectPlanningHelper:
 
 
 def example_plan_nutrition_analysis():
-    """Example: Plan a new nutrition analysis feature."""
+    """範例：規劃營養分析功能。"""
     print("=" * 70)
     print("  Example: Planning 'Nutrition Analysis' Feature")
     print("=" * 70)
@@ -159,7 +159,7 @@ def example_plan_nutrition_analysis():
 
 
 def example_plan_meal_recommendation():
-    """Example: Plan a meal recommendation system."""
+    """範例：規劃餐點推薦系統。"""
     print("\n\n" + "=" * 70)
     print("  Example: Planning 'Meal Recommendation' Feature")
     print("=" * 70)
@@ -178,7 +178,7 @@ def example_plan_meal_recommendation():
 
 
 def example_full_workflow():
-    """Example: Full workflow for a new project module."""
+    """範例：新專案模組的完整工作流程。"""
     print("\n\n" + "=" * 70)
     print("  Example: Full Workflow - Calorie Tracking Enhancement")
     print("=" * 70)

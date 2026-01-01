@@ -1,10 +1,10 @@
 """
-Example script demonstrating the usage of the three agents.
+展示三個代理使用方式的範例腳本。
 
-This script shows how to use:
-- Strategic Planner
-- Steering Architect
-- Task Executor
+本腳本展示如何使用：
+- 戰略規劃者
+- 架構設計師
+- 任務執行者
 """
 
 import sys
@@ -19,14 +19,14 @@ import json
 
 
 def print_section(title):
-    """Print a section header."""
+    """印出區段標題。"""
     print("\n" + "=" * 60)
     print(f"  {title}")
     print("=" * 60 + "\n")
 
 
 def example_strategic_planner():
-    """Demonstrate Strategic Planner usage."""
+    """展示戰略規劃者的使用方式。"""
     print_section("Strategic Planner 範例")
     
     planner = StrategicPlanner()
@@ -71,7 +71,7 @@ def example_strategic_planner():
 
 
 def example_steering_architect():
-    """Demonstrate Steering Architect usage."""
+    """展示架構設計師的使用方式。"""
     print_section("Steering Architect 範例")
     
     architect = SteeringArchitect()
@@ -161,7 +161,7 @@ def example_steering_architect():
 
 
 def example_task_executor():
-    """Demonstrate Task Executor usage."""
+    """展示任務執行者的使用方式。"""
     print_section("Task Executor 範例")
     
     executor = TaskExecutor()
@@ -280,7 +280,7 @@ def example_task_executor():
 
 
 def example_agent_manager():
-    """Demonstrate Agent Manager usage."""
+    """展示代理管理器的使用方式。"""
     print_section("Agent Manager 範例")
     
     manager = AgentManager()
@@ -344,7 +344,7 @@ def example_agent_manager():
 
 
 def main():
-    """Run all examples."""
+    """執行所有範例。"""
     print("\n" + "=" * 60)
     print("  三個 Agents 系統使用範例")
     print("=" * 60)

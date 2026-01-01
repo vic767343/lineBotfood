@@ -1,5 +1,5 @@
 """
-Base Agent class for all agents.
+所有代理的基礎類別。
 """
 
 from abc import ABC, abstractmethod
@@ -10,15 +10,15 @@ from datetime import datetime
 
 
 class BaseAgent(ABC):
-    """Base class for all agents."""
+    """所有代理的基礎類別。"""
     
     def __init__(self, name: str, description: str):
         """
-        Initialize the base agent.
+        初始化基礎代理。
         
         Args:
-            name: The name of the agent
-            description: Description of what the agent does
+            name: 代理的名稱
+            description: 代理功能的描述
         """
         self.name = name
         self.description = description
@@ -28,23 +28,23 @@ class BaseAgent(ABC):
     @abstractmethod
     def process(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Process input data and return results.
+        處理輸入資料並返回結果。
         
         Args:
-            input_data: Dictionary containing input data for processing
+            input_data: 包含處理輸入資料的字典
             
         Returns:
-            Dictionary containing processing results
+            包含處理結果的字典
         """
         pass
     
     def log_activity(self, activity_type: str, details: Dict[str, Any]) -> None:
         """
-        Log agent activity.
+        記錄代理活動。
         
         Args:
-            activity_type: Type of activity being logged
-            details: Details of the activity
+            activity_type: 正在記錄的活動類型
+            details: 活動的詳細資訊
         """
         entry = {
             "timestamp": datetime.now().isoformat(),
@@ -56,24 +56,24 @@ class BaseAgent(ABC):
     
     def get_history(self) -> List[Dict[str, Any]]:
         """
-        Get the activity history of the agent.
+        取得代理的活動歷史記錄。
         
         Returns:
-            List of activity entries
+            活動項目列表
         """
         return self.history.copy()
     
     def clear_history(self) -> None:
-        """Clear the activity history."""
+        """清除活動歷史記錄。"""
         self.history.clear()
         self.logger.info(f"{self.name} - History cleared")
     
     def get_info(self) -> Dict[str, Any]:
         """
-        Get information about the agent.
+        取得代理的資訊。
         
         Returns:
-            Dictionary containing agent information
+            包含代理資訊的字典
         """
         return {
             "name": self.name,

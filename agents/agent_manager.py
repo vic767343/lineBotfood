@@ -1,7 +1,7 @@
 """
-Agent Manager
+代理管理器
 
-Manages and coordinates all agents in the system.
+管理並協調系統中的所有代理。
 """
 
 from typing import Dict, Any, List, Optional
@@ -13,16 +13,16 @@ from .task_executor import TaskExecutor
 
 class AgentManager:
     """
-    Manages and coordinates all agents.
+    管理並協調所有代理。
     
-    Provides a unified interface to work with:
-    - Strategic Planner
-    - Steering Architect
-    - Task Executor
+    提供統一介面來操作：
+    - 戰略規劃者
+    - 架構設計師
+    - 任務執行者
     """
     
     def __init__(self):
-        """Initialize the agent manager with all agents."""
+        """使用所有代理初始化代理管理器。"""
         self.logger = logging.getLogger("agents.manager")
         
         # Initialize agents
@@ -40,34 +40,34 @@ class AgentManager:
     
     def get_agent(self, agent_name: str) -> Optional[Any]:
         """
-        Get a specific agent by name.
+        依名稱取得特定代理。
         
         Args:
-            agent_name: Name of the agent
+            agent_name: 代理的名稱
             
         Returns:
-            Agent instance or None if not found
+            代理實例，若未找到則返回 None
         """
         return self.agents.get(agent_name)
     
     def list_agents(self) -> List[Dict[str, Any]]:
         """
-        List all available agents.
+        列出所有可用的代理。
         
         Returns:
-            List of agent information
+            代理資訊列表
         """
         return [agent.get_info() for agent in self.agents.values()]
     
     def execute_workflow(self, workflow_data: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Execute a complete workflow across multiple agents.
+        執行跨多個代理的完整工作流程。
         
         Args:
-            workflow_data: Dictionary containing workflow information
+            workflow_data: 包含工作流程資訊的字典
             
         Returns:
-            Workflow execution results
+            工作流程執行結果
         """
         workflow_type = workflow_data.get("type", "")
         results = {
@@ -158,10 +158,10 @@ class AgentManager:
     
     def get_system_status(self) -> Dict[str, Any]:
         """
-        Get status of all agents in the system.
+        取得系統中所有代理的狀態。
         
         Returns:
-            System status information
+            系統狀態資訊
         """
         return {
             "agents": self.list_agents(),
@@ -180,10 +180,10 @@ class AgentManager:
     
     def reset_all_agents(self) -> Dict[str, Any]:
         """
-        Reset all agents to initial state.
+        重置所有代理到初始狀態。
         
         Returns:
-            Reset confirmation
+            重置確認
         """
         for agent in self.agents.values():
             agent.clear_history()
